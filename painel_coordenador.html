@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Coordenador | Colégio Veras</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <i class="fa-solid fa-graduation-cap" style="font-size: 1.5rem;"></i>
+                <span>COLÉGIO VERAS</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="tab-link active" data-tab="tab-dashboard"><i class="fa-solid fa-chart-pie"></i>
+                        Dashboard</a></li>
+                <li><a href="#" class="tab-link" data-tab="tab-turmas"><i class="fa-solid fa-chalkboard-user"></i>
+                        Criar Nova Turma</a></li>
+                <li><a href="#" class="tab-link" data-tab="tab-usuarios"><i class="fa-solid fa-users-gear"></i>
+                        Utilizadores e Vínculos</a></li>
+                <li><a href="#" class="tab-link" data-tab="tab-horarios"><i class="fa-solid fa-calendar-days"></i>
+                        Horários</a></li>
+                <li><a href="#" class="tab-link" data-tab="tab-relatorios"><i class="fa-solid fa-chart-line"></i>
+                        Turmas e Disciplinas</a></li>
+                <li style="margin-top: auto;"><a href="#" id="logoutBtn"
+                        style="color: #fca5a5; background: rgba(239, 68, 68, 0.1);"><i
+                            class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <h2>Painel do Coordenador</h2>
+                <div class="user-info">
+                    <span id="adminName">Coordenador / Admin</span>
+                    <i class="fa-solid fa-circle-user" style="font-size: 2rem; color: var(--primary-color);"></i>
+                </div>
+            </header>
+
+            <!-- TABS -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="dash-grid">
+                    <div class="dash-widget blue">
+                        <div class="dash-icon blue"><i class="fa-solid fa-user-graduate"></i></div>
+                        <div class="dash-info">
+                            <h4>Total de Alunos</h4>
+                            <p id="dashTotalAlunos">...</p>
+                        </div>
+                    </div>
+                    <div class="dash-widget green">
+                        <div class="dash-icon green"><i class="fa-solid fa-chalkboard-user"></i></div>
+                        <div class="dash-info">
+                            <h4>Professores</h4>
+                            <p id="dashTotalProfessores">...</p>
+                        </div>
+                    </div>
+                    <div class="dash-widget gold">
+                        <div class="dash-icon gold"><i class="fa-solid fa-calendar-check"></i></div>
+                        <div class="dash-info">
+                            <h4>Total de Turmas</h4>
+                            <p id="dashTotalTurmas">...</p>
+                        </div>
+                    </div>
+                    <div class="dash-widget red">
+                        <div class="dash-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="dash-info">
+                            <h4>Alertas Críticos</h4>
+                            <p id="dashAlertasCriticos">...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="panel-card" style="margin-bottom: 0;">
+                        <h3><i class="fa-solid fa-chart-area" style="color: var(--primary-color);"></i> Desempenho e
+                            Adesão (Visão Geral)</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                            <div
+                                style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <h4
+                                    style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem; text-align: center; text-transform: uppercase; font-family: 'Inter', sans-serif;">
+                                    Distribuição de Utilizadores</h4>
+                                <div style="position: relative; width: 100%; height: 200px;">
+                                    <canvas id="userRolesChart"></canvas>
+                                </div>
+                            </div>
+                            <div
+                                style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <h4
+                                    style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem; text-align: center; text-transform: uppercase; font-family: 'Inter', sans-serif;">
+                                    Alunos por Turno</h4>
+                                <div style="position: relative; width: 100%; height: 200px;">
+                                    <canvas id="alunosPorTurnoChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-card" style="margin-bottom: 0;">
+                        <h3><i class="fa-solid fa-bell" style="color: var(--secondary-color);"></i> Alertas e Pendências
+                        </h3>
+                        <ul class="alert-list" id="dashAlertList">
+                            <li class="alert-item info">
+                                <i class="fa-solid fa-spinner fa-spin" style="color: #3b82f6;"></i>
+                                <div class="content">
+                                    <h5>A carregar dados...</h5>
+                                    <p>Por favor, aguarde enquanto os dados são analisados e os alertas gerados.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-usuarios" class="tab-content">
+                <div class="panel-card">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--primary-color);">Criar Credenciais (Alunos / Pais /
+                        Professores)</h3>
+                    <form id="createUserForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div class="form-group">
+                            <label>Tipo de Utilizador</label>
+                            <select id="userRole" required>
+                                <option value="aluno">Aluno</option>
+                                <option value="professor">Professor</option>
+                                <option value="pais">Pais/Responsável</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Nome Completo</label>
+                            <input type="text" id="userName" required placeholder="Ex: João Silva">
+                        </div>
+                        <div class="form-group">
+                            <label id="lblUserId">Endereço de E-mail</label>
+                            <input type="text" id="userId" required placeholder="Ex: usuario@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Senha Provisória</label>
+                            <input type="password" id="userPassword" required placeholder="Senha inicial">
+                        </div>
+                        <!-- Aluno: pertence a UMA única turma -->
+                        <div class="form-group" id="grpTurma">
+                            <label>Turma do Aluno</label>
+                            <select id="userTurma">
+                                <option value="">Sem turma (associar depois)</option>
+                            </select>
+                        </div>
+                        <div class="form-group hidden" id="grpAlunoTelefone">
+                            <label>Telefone de Contato</label>
+                            <input type="text" id="userTelefone" placeholder="Ex: 912345678">
+                        </div>
+                        <div class="form-group hidden" id="grpAlunoEndereco">
+                            <label>Endereço</label>
+                            <input type="text" id="userEndereco" placeholder="Rua, Número, Cidade">
+                        </div>
+                        <!-- Professor: leciona UMA OU MAIS disciplinas -->
+                        <div class="form-group hidden" id="grpDisciplinas">
+                            <label>Disciplinas que leciona</label>
+                            <select id="userDisciplinas" multiple style="height: 120px;">
+                                <option value="Matemática">Matemática</option>
+                                <option value="Português">Português</option>
+                                <option value="História">História</option>
+                                <option value="Geografia">Geografia</option>
+                                <option value="Ciências">Ciências</option>
+                                <option value="Física">Física</option>
+                                <option value="Química">Química</option>
+                                <option value="Biologia">Biologia</option>
+                                <option value="Inglês">Inglês</option>
+                                <option value="Espanhol">Espanhol</option>
+                                <option value="Artes">Artes</option>
+                                <option value="Educação Física">Educação Física</option>
+                                <option value="Filosofia">Filosofia</option>
+                                <option value="Sociologia">Sociologia</option>
+                            </select>
+                            <small style="color: #64748b;">Pressione Ctrl (Windows) ou Cmd (Mac) para selecionar várias
+                                disciplinas.</small>
+                        </div>
+
+                        <!-- Pais: vincular aluno -->
+                        <div class="form-group hidden" id="grpVincularAluno">
+                            <label>Vincular ao Aluno</label>
+                            <input type="text" id="searchAluno" placeholder="Digite o nome ou matrícula do aluno"
+                                autocomplete="off">
+                            <select id="selectVinculoAluno" style="display: none; margin-top: 5px;" required>
+                                <option value="">Selecione um aluno...</option>
+                            </select>
+                        </div>
+
+                        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
+                            <button type="submit" class="btn btn-primary" style="border: none;">Gerar
+                                Credencial</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="panel-card">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--primary-color);">Utilizadores Registados</h3>
+                    <div class="table-responsive">
+                        <table id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>E-mail</th>
+                                    <th>Tipo</th>
+                                    <th>Turma / Disciplinas</th>
+                                    <th>Data de Registo</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: DIÁRIO DE CLASSE (montado por js/diario.js) -->
+            <div id="tab-diario" class="tab-content"></div>
+
+            <!-- TAB: TURMAS E DISCIPLINAS (Antigo RELATÓRIOS) -->
+            <div id="tab-relatorios" class="tab-content">
+                <div class="sub-tabs-container"
+                    style="margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0; display: flex; gap: 2rem;">
+                    <button class="sub-tab-btn active" data-subtab="sub-turmas-existentes"
+                        style="background: none; border: none; padding: 1rem 0; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 600; color: var(--primary-color); border-bottom: 3px solid var(--primary-color); cursor: pointer; transition: all 0.3s ease;">Turmas
+                        Existentes</button>
+                    <button class="sub-tab-btn" data-subtab="sub-alunos-turma"
+                        style="background: none; border: none; padding: 1rem 0; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 500; color: #64748b; cursor: pointer; transition: all 0.3s ease;">Lista
+                        de Alunos por Turma</button>
+                    <button class="sub-tab-btn" data-subtab="sub-relatorios-auditoria"
+                        style="background: none; border: none; padding: 1rem 0; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 500; color: #64748b; cursor: pointer; transition: all 0.3s ease;">Relatórios
+                        Escolares (Auditoria)</button>
+                </div>
+
+                <div id="sub-turmas-existentes" class="sub-tab-content active" style="display: block;">
+                    <div class="panel-card">
+                        <h3 style="margin-bottom: 1.5rem; color: var(--primary-color);">Turmas Existentes</h3>
+                        <div class="table-responsive">
+                            <table id="turmasExistentesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Nome da Turma</th>
+                                        <th>Série/Ano</th>
+                                        <th>Turno</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="sub-alunos-turma" class="sub-tab-content" style="display: none;">
+                    <div class="panel-card">
+                        <h3 style="margin-bottom: 1.5rem; color: var(--primary-color);">Lista de Alunos por Turma</h3>
+                        <div class="form-group" style="max-width: 300px; margin-bottom: 2rem;">
+                            <label>Selecione a Turma:</label>
+                            <select id="alunosPorTurmaSelect">
+                                <option value="">Todas as Turmas</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="alunosPorTurmaTable" style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Matrícula</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="sub-relatorios-auditoria" class="sub-tab-content" style="display: none;">
+                    <div class="panel-card">
+                        <h3 style="margin-bottom: 1.5rem; color: var(--primary-color);">Auditoria de Diários de Classe
+                        </h3>
+                        <div class="form-group" style="max-width: 300px; margin-bottom: 2rem;">
+                            <label>Filtrar por Turma:</label>
+                            <select id="relatoriosTurmaSelect">
+                                <option value="">Todas as Turmas</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="diariosAuditTable">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Turma</th>
+                                        <th>Disciplina</th>
+                                        <th>Professor</th>
+                                        <th>Sumário</th>
+                                        <th>Frequência (P/F)</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-turmas" class="tab-content">
+                <div class="panel-card">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--primary-color);" id="turmaFormTitle">Nova Turma</h3>
+                    <form id="createTurmaForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <input type="hidden" id="turmaEditId">
+                        <div class="form-group">
+                            <label>Nome da Turma</label>
+                            <input type="text" id="turmaName" required placeholder="Ex: 8º Ano A">
+                        </div>
+                        <div class="form-group">
+                            <label>Turno</label>
+                            <select id="turmaTurno" required>
+                                <option value="Manhã">Manhã</option>
+                                <option value="Tarde">Tarde</option>
+                            </select>
+                        </div>
+                        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 1rem;">
+                            <button type="button" class="btn-primary" id="turmaCancelEdit"
+                                style="border: none; background: #64748b; display: none;">Cancelar</button>
+                            <button type="submit" class="btn-primary" style="border: none;" id="turmaSubmitBtn">Criar
+                                Turma</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="tab-horarios" class="tab-content">
+                <div class="panel-card">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--primary-color);">Grelha de Horários</h3>
+                    <div style="display: flex; gap: 1rem; align-items: end; margin-bottom: 2rem; flex-wrap: wrap;">
+                        <div class="form-group" style="min-width: 300px; margin: 0;">
+                            <label>Selecione a Turma:</label>
+                            <select id="horarioTurmaSelect">
+                                <option value="">A carregar turmas...</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" id="btnNovaAula" style="display: none;"><i
+                                class="fa-solid fa-plus"></i> Nova Aula</button>
+                    </div>
+
+                    <div id="calendarContainer" style="display: none;">
+                        <div class="calendar-scroll">
+                            <div class="calendar-grid week-7" id="adminCalendarGrid">
+                                <!-- Gerado via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Horários -->
+    <div class="modal-overlay" id="horarioModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Atribuir Aula</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <form id="horarioForm">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Dia da Semana</label>
+                        <select id="modalDia" required>
+                            <option value="Segunda">Segunda</option>
+                            <option value="Terça">Terça</option>
+                            <option value="Quarta">Quarta</option>
+                            <option value="Quinta">Quinta</option>
+                            <option value="Sexta">Sexta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Horário</label>
+                        <select id="modalHora" required>
+                            <option value="08:00 - 08:50">08:00 - 08:50</option>
+                            <option value="08:50 - 09:40">08:50 - 09:40</option>
+                            <option value="10:00 - 10:50">10:00 - 10:50</option>
+                            <option value="10:50 - 11:40">10:50 - 11:40</option>
+                            <option value="11:40 - 12:30">11:40 - 12:30</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Professor</label>
+                    <select id="modalProfessor" required>
+                        <option value="">A carregar professores...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Disciplina</label>
+                    <select id="modalDisciplina" required disabled>
+                        <option value="">Selecione o Professor primeiro...</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                    <button type="button" class="btn-primary" style="background: #ef4444; display: none;"
+                        id="btnRemoverAula">Remover</button>
+                    <button type="submit" class="btn-primary">Salvar Aula</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Editar Utilizador (turma do aluno / disciplinas do professor) -->
+    <div class="modal-overlay" id="userModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="userModalTitle" style="font-size: 1.4rem;">Editar Utilizador</h3>
+                <button class="modal-close" id="closeUserModal">&times;</button>
+            </div>
+            <form id="userEditForm">
+                <input type="hidden" id="editUserDocId">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="editUserName" required>
+                </div>
+                <div class="form-group" id="editGrpTurma">
+                    <label>Turma do Aluno</label>
+                    <select id="editUserTurma">
+                        <option value="">Sem turma</option>
+                    </select>
+                    <small style="color: #64748b;">Um aluno pertence a uma única turma de cada vez.</small>
+                </div>
+                <div class="form-group" id="editGrpDisciplinas">
+                    <label>Disciplinas que leciona</label>
+                    <select id="editUserDisciplinas" multiple style="height: 120px;">
+                        <option value="Matemática">Matemática</option>
+                        <option value="Português">Português</option>
+                        <option value="História">História</option>
+                        <option value="Geografia">Geografia</option>
+                        <option value="Ciências">Ciências</option>
+                        <option value="Física">Física</option>
+                        <option value="Química">Química</option>
+                        <option value="Biologia">Biologia</option>
+                        <option value="Inglês">Inglês</option>
+                        <option value="Espanhol">Espanhol</option>
+                        <option value="Artes">Artes</option>
+                        <option value="Educação Física">Educação Física</option>
+                        <option value="Filosofia">Filosofia</option>
+                        <option value="Sociologia">Sociologia</option>
+                    </select>
+                    <small style="color: #64748b;">Pressione Ctrl (Windows) ou Cmd (Mac) para selecionar várias
+                        disciplinas.</small>
+                </div>
+                <div class="form-group" id="editGrpIsAdmin">
+                    <label class="checkbox-group" style="font-weight: 400;">
+                        <input type="checkbox" id="editUserIsAdmin" style="width: auto;"> Coordenador (acesso total à
+                        Gestão)
+                    </label>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="border: none;">Guardar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Perfil do Aluno -->
+    <div class="modal-overlay" id="alunoPerfilModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 style="font-size: 1.4rem;"><i class="fa-solid fa-user-graduate"></i> Perfil do Aluno</h3>
+                <button class="modal-close" id="closeAlunoPerfilModal">&times;</button>
+            </div>
+            <div style="margin-top: 1rem; color: var(--text-color);">
+                <p><strong>Nome:</strong> <span id="mdlAlunoNome"></span></p>
+                <p><strong>Matrícula:</strong> <span id="mdlAlunoMatricula"></span></p>
+                <p><strong>E-mail:</strong> <span id="mdlAlunoEmail"></span></p>
+                <p><strong>Telefone:</strong> <span id="mdlAlunoTelefone"></span></p>
+                <p><strong>Endereço:</strong> <span id="mdlAlunoEndereco"></span></p>
+                <p><strong>Turma:</strong> <span id="mdlAlunoTurma"></span></p>
+
+                <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+                <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Boletim Escolar</h4>
+                <div class="table-responsive">
+                    <table id="mdlAlunoBoletimTable" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th>Disciplina</th>
+                                <th>1º Bimestre</th>
+                                <th>2º Bimestre</th>
+                                <th>3º Bimestre</th>
+                                <th>4º Bimestre</th>
+                                <th>Média</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="diarioDetalheModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 style="font-size: 1.4rem;">Detalhes do Registo de Aula</h3>
+                <button class="modal-close" id="closeDiarioModal">&times;</button>
+            </div>
+            <div style="margin-top: 1rem; color: var(--text-color);">
+                <p><strong>Data:</strong> <span id="mdlDiarioData"></span></p>
+                <p><strong>Turma:</strong> <span id="mdlDiarioTurma"></span></p>
+                <p><strong>Disciplina:</strong> <span id="mdlDiarioDisciplina"></span></p>
+                <p><strong>Professor:</strong> <span id="mdlDiarioProfessor"></span></p>
+                <div style="margin-top: 1rem;">
+                    <strong>Sumário:</strong>
+                    <div id="mdlDiarioSumario"
+                        style="margin-top: 0.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px; font-size: 0.95rem; white-space: pre-wrap;">
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <strong>Lista de Presenças/Faltas:</strong>
+                    <ul id="mdlDiarioAlunos" style="margin-top: 0.5rem; padding-left: 0; list-style: none;">
+                        <!-- Alunos listados aqui -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, secondaryAuth, db } from './js/firebase-config.js';
+        import { getUserProfile, isAdminProfile } from './js/auth-utils.js';
+        import { onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+        import { collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, serverTimestamp, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        // Tab Navigation
+        document.querySelectorAll('.tab-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                document.getElementById(e.currentTarget.getAttribute('data-tab')).classList.add('active');
+
+                // Refresh data if needed
+                if (e.currentTarget.getAttribute('data-tab') === 'tab-horarios') loadTurmasToSelect();
+                if (e.currentTarget.getAttribute('data-tab') === 'tab-relatorios') loadRelatorios();
+            });
+        });
+
+        // Proteger Rota
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = 'portais.html'; return; }
+            const qs = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
+            if (qs.empty || qs.docs[0].data().role !== 'coordenador') {
+                window.location.href = 'portais.html';
+            } else {
+                document.getElementById('adminName').innerText = qs.docs[0].data().name || user.email.split('@')[0];
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            signOut(auth).then(() => window.location.href = 'portais.html');
+        });
+
+        // ----- TAB: UTILIZADORES -----
+        async function loadUsers() {
+            const tbody = document.querySelector('#usersTable tbody');
+            tbody.innerHTML = '<tr><td colspan="5">A carregar...</td></tr>';
+            try {
+                const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
+                const qs = await getDocs(q);
+                tbody.innerHTML = qs.empty ? '<tr><td colspan="5">Sem registos.</td></tr>' : '';
+                qs.forEach(docSnap => {
+                    const data = docSnap.data();
+                    let badgeClass = 'badge-aluno';
+                    let roleText = 'Aluno';
+                    if (data.role === 'pais') { badgeClass = 'badge-pais'; roleText = 'Pais'; }
+                    if (data.role === 'professor') { badgeClass = 'badge-prof'; roleText = 'Professor'; }
+
+                    const dateStr = data.createdAt ? data.createdAt.toDate().toLocaleDateString('pt-BR') : "N/A";
+                    tbody.innerHTML += `<tr>
+                        <td>${data.name}</td>
+                        <td>${data.email}</td>
+                        <td><span class="badge ${badgeClass}">${roleText}</span></td>
+                        <td>${dateStr}</td>
+                        <td><button class="action-btn" data-docid="${docSnap.id}"><i class="fa-solid fa-trash"></i></button></td>
+                    </tr>`;
+                });
+
+                document.querySelectorAll('#usersTable .action-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const docId = e.currentTarget.getAttribute('data-docid');
+                        if (confirm("Deseja eliminar este registo?")) {
+                            await deleteDoc(doc(db, "users", docId));
+                            loadUsers();
+                        }
+                    });
+                });
+            } catch (error) { console.error(error); }
+        }
+        async function loadTurmasToUserSelect() {
+            const select = document.getElementById('userTurma');
+            select.innerHTML = '<option value="">Sem turma (associar depois)</option>';
+            try {
+                const qs = await getDocs(collection(db, "turmas"));
+                qs.forEach(docSnap => {
+                    select.innerHTML += `<option value="${docSnap.id}">${docSnap.data().nome}</option>`;
+                });
+            } catch (error) { console.error(error); }
+        }
+        loadTurmasToUserSelect();
+
+        // Dynamic User Form Fields
+        const roleSelect = document.getElementById('userRole');
+        const lblUserId = document.getElementById('lblUserId');
+        const userIdInput = document.getElementById('userId');
+        const grpTurma = document.getElementById('grpTurma');
+        const grpAlunoTelefone = document.getElementById('grpAlunoTelefone');
+        const grpAlunoEndereco = document.getElementById('grpAlunoEndereco');
+        const grpDisciplinas = document.getElementById('grpDisciplinas');
+        const grpVincularAluno = document.getElementById('grpVincularAluno');
+
+        const btnSubmitUser = document.querySelector('#createUserForm button[type="submit"]');
+        const searchAlunoInput = document.getElementById('searchAluno');
+        const selectVinculoAluno = document.getElementById('selectVinculoAluno');
+
+        roleSelect.addEventListener('change', () => {
+            const role = roleSelect.value;
+            // Reset fields
+            grpTurma.style.display = 'none';
+            grpAlunoTelefone.style.display = 'none';
+            grpAlunoEndereco.style.display = 'none';
+            grpDisciplinas.style.display = 'none';
+            grpVincularAluno.style.display = 'none';
+
+            selectVinculoAluno.style.display = 'none';
+            selectVinculoAluno.required = false;
+            btnSubmitUser.disabled = false;
+
+            if (role === 'aluno') {
+                lblUserId.innerText = 'Matrícula';
+                userIdInput.placeholder = 'Ex: 12345';
+                userIdInput.type = 'text';
+                grpTurma.style.display = 'block';
+                grpAlunoTelefone.style.display = 'block';
+                grpAlunoEndereco.style.display = 'block';
+            } else if (role === 'professor') {
+                lblUserId.innerText = 'Endereço de E-mail';
+                userIdInput.placeholder = 'Ex: professor@escola.com';
+                userIdInput.type = 'email';
+                grpDisciplinas.style.display = 'block';
+
+            } else if (role === 'pais') {
+                lblUserId.innerText = 'Endereço de E-mail';
+                userIdInput.placeholder = 'Ex: pais@email.com';
+                userIdInput.type = 'email';
+                grpVincularAluno.style.display = 'block';
+                selectVinculoAluno.required = true;
+                btnSubmitUser.disabled = true; // wait for link
+            }
+        });
+        // Initial setup
+        roleSelect.dispatchEvent(new Event('change'));
+
+        let timeoutBusca = null;
+        searchAlunoInput.addEventListener('input', (e) => {
+            clearTimeout(timeoutBusca);
+            const val = e.target.value.trim().toLowerCase();
+            if (val.length < 1) {
+                selectVinculoAluno.style.display = 'none';
+                btnSubmitUser.disabled = true;
+                return;
+            }
+            timeoutBusca = setTimeout(async () => {
+                const q = query(collection(db, "users"), where("role", "==", "aluno"));
+                const qs = await getDocs(q);
+                selectVinculoAluno.innerHTML = '<option value="">Selecione um aluno...</option>';
+                let found = false;
+                qs.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const matricula = data.matricula ? String(data.matricula).toLowerCase() : "";
+                    const nome = data.name ? data.name.toLowerCase() : "";
+                    if (matricula.includes(val) || nome.includes(val)) {
+                        found = true;
+                        selectVinculoAluno.innerHTML += `<option value="${docSnap.id}">${data.name} (Matrícula: ${data.matricula || 'N/A'})</option>`;
+                    }
+                });
+                if (found) {
+                    selectVinculoAluno.style.display = 'block';
+                } else {
+                    selectVinculoAluno.innerHTML = '<option value="">Nenhum aluno encontrado</option>';
+                    selectVinculoAluno.style.display = 'block';
+                    btnSubmitUser.disabled = true;
+                }
+            }, 300);
+        });
+
+        selectVinculoAluno.addEventListener('change', (e) => {
+            if (e.target.value) {
+                btnSubmitUser.disabled = false;
+            } else {
+                btnSubmitUser.disabled = true;
+            }
+        });
+
+        document.getElementById('createUserForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.innerText = "A criar...";
+
+            const tipoUtilizador = document.getElementById('userRole').value;
+            let userRole = tipoUtilizador;
+
+            const name = document.getElementById('userName').value;
+            let finalEmail = document.getElementById('userId').value.trim();
+            const password = document.getElementById('userPassword').value;
+
+            let matricula = null;
+            if (tipoUtilizador === 'aluno') {
+                matricula = finalEmail;
+                finalEmail = `${matricula}@aluno.escola.com`;
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(secondaryAuth, finalEmail, password);
+                await signOut(secondaryAuth);
+
+                const userData = {
+                    uid: userCredential.user.uid,
+                    name,
+                    role: userRole,
+                    email: finalEmail,
+                    createdAt: serverTimestamp()
+                };
+
+                if (tipoUtilizador === 'aluno') {
+                    userData.matricula = matricula;
+                    userData.turmaId = document.getElementById('userTurma').value;
+                    userData.telefone = document.getElementById('userTelefone').value;
+                    userData.endereco = document.getElementById('userEndereco').value;
+                } else if (tipoUtilizador === 'professor') {
+                    const selectDisc = document.getElementById('userDisciplinas');
+                    const selectedDisciplinas = Array.from(selectDisc.selectedOptions).map(opt => opt.value);
+                    userData.disciplinas = selectedDisciplinas;
+                } else if (tipoUtilizador === 'pais') {
+                    userData.vinculoAlunoId = document.getElementById('selectVinculoAluno').value;
+                }
+
+                await addDoc(collection(db, "users"), userData);
+                alert('Credencial criada com sucesso!');
+                this.reset();
+                document.getElementById('userRole').dispatchEvent(new Event('change'));
+                loadUsers();
+            } catch (error) {
+                alert("Erro ao criar credencial: " + error.message);
+                btn.disabled = false; btn.innerText = "Gerar Credencial";
+            } finally {
+                if (btn.disabled && tipoUtilizador !== 'pais') {
+                    btn.disabled = false; btn.innerText = "Gerar Credencial";
+                } else if (tipoUtilizador === 'pais' && !document.getElementById('selectVinculoAluno').value) {
+                    btn.disabled = true; btn.innerText = "Gerar Credencial";
+                } else {
+                    btn.disabled = false; btn.innerText = "Gerar Credencial";
+                }
+            }
+        });
+
+        // ----- TAB: TURMAS -----
+        async function loadTurmas() {
+            const tbody = document.querySelector('#turmasTable tbody');
+            if (!tbody) return; // Null check
+            try {
+                tbody.innerHTML = '<tr><td colspan="3">A carregar...</td></tr>';
+                const qs = await getDocs(collection(db, "turmas"));
+                tbody.innerHTML = qs.empty ? '<tr><td colspan="3">Sem turmas.</td></tr>' : '';
+                qs.forEach(docSnap => {
+                    const data = docSnap.data();
+                    tbody.innerHTML += `<tr>
+                        <td>${data.nome}</td>
+                        <td>${data.turno}</td>
+                        <td><button class="action-btn" data-docid="${docSnap.id}"><i class="fa-solid fa-trash"></i></button></td>
+                    </tr>`;
+                });
+                document.querySelectorAll('#turmasTable .action-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if (confirm("Deseja eliminar esta turma?")) {
+                            try {
+                                await deleteDoc(doc(db, "turmas", e.currentTarget.getAttribute('data-docid')));
+                                loadTurmas();
+                            } catch (err) { console.error("Erro ao eliminar turma:", err); }
+                        }
+                    });
+                });
+            } catch (error) { console.error("Erro no loadTurmas:", error); }
+        }
+        loadTurmas();
+
+        async function loadTurmasToList() {
+            const select = document.getElementById('listAlunosTurmaSelect');
+            if (!select) return; // Null check
+            try {
+                select.innerHTML = '<option value="">Selecione a Turma...</option>';
+                const qs = await getDocs(collection(db, "turmas"));
+                qs.forEach(docSnap => {
+                    select.innerHTML += `<option value="${docSnap.id}">${docSnap.data().nome}</option>`;
+                });
+            } catch (error) { console.error("Erro no loadTurmasToList:", error); }
+        }
+        loadTurmasToList();
+
+        const listAlunosTurmaSelect = document.getElementById('listAlunosTurmaSelect');
+        if (listAlunosTurmaSelect) {
+            listAlunosTurmaSelect.addEventListener('change', async (e) => {
+                const turmaId = e.target.value;
+                const container = document.getElementById('listAlunosContainer');
+                const tbody = document.querySelector('#listAlunosTable tbody');
+                if (!turmaId) {
+                    container.style.display = 'none';
+                    return;
+                }
+                container.style.display = 'block';
+                tbody.innerHTML = '<tr><td colspan="3">A carregar alunos...</td></tr>';
+
+                try {
+                    const q = query(collection(db, "users"), where("role", "==", "aluno"), where("turmaId", "==", turmaId));
+                    const qs = await getDocs(q);
+
+                    if (qs.empty) {
+                        tbody.innerHTML = '<tr><td colspan="3">Nenhum aluno associado a esta turma.</td></tr>';
+                        return;
+                    }
+
+                    tbody.innerHTML = '';
+                    qs.forEach(docSnap => {
+                        const data = docSnap.data();
+                        tbody.innerHTML += `<tr>
+                            <td>${data.matricula || 'N/A'}</td>
+                            <td>${data.name}</td>
+                            <td>${data.email}</td>
+                        </tr>`;
+                    });
+                } catch (error) { console.error("Erro ao carregar alunos da turma:", error); }
+            });
+        }
+
+
+        document.getElementById('createTurmaForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const nome = document.getElementById('turmaName').value;
+            const turno = document.getElementById('turmaTurno').value;
+            try {
+                await addDoc(collection(db, "turmas"), { nome, turno });
+                alert('Turma criada com sucesso!');
+                this.reset();
+                loadTurmas();
+                loadTurmasToList();
+                loadTurmasToSelect(); // Update select lists
+            } catch (error) { alert("Erro: " + error.message); }
+        });
+
+        // ----- TAB: HORÁRIOS -----
+        const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
+        const horas = ["08:00 - 08:50", "08:50 - 09:40", "10:00 - 10:50", "10:50 - 11:40", "11:40 - 12:30"];
+        let currentTurmaId = "";
+        let horariosData = {}; // key: "dia-hora" -> obj
+
+        async function loadTurmasToSelect() {
+            const select = document.getElementById('horarioTurmaSelect');
+            select.innerHTML = '<option value="">Selecione a Turma...</option>';
+            try {
+                const qs = await getDocs(collection(db, "turmas"));
+                qs.forEach(docSnap => {
+                    select.innerHTML += `<option value="${docSnap.id}">${docSnap.data().nome}</option>`;
+                });
+            } catch (error) { console.error(error); }
+        }
+
+        document.getElementById('horarioTurmaSelect').addEventListener('change', (e) => {
+            currentTurmaId = e.target.value;
+            if (currentTurmaId) {
+                document.getElementById('calendarContainer').style.display = 'block';
+                document.getElementById('btnNovaAula').style.display = 'block';
+                renderCalendar();
+                loadHorarios(currentTurmaId);
+            } else {
+                document.getElementById('calendarContainer').style.display = 'none';
+                document.getElementById('btnNovaAula').style.display = 'none';
+            }
+        });
+
+        document.getElementById('btnNovaAula').addEventListener('click', () => {
+            if (!currentTurmaId) {
+                alert("Selecione uma turma primeiro.");
+                return;
+            }
+            window.openModal('Segunda', '08:00 - 08:50', null);
+        });
+
+        function renderCalendar() {
+            const grid = document.getElementById('adminCalendarGrid');
+            grid.innerHTML = '<div class="calendar-header">Hora</div>';
+            dias.forEach(d => grid.innerHTML += `<div class="calendar-header">${d}</div>`);
+
+            horas.forEach((hora, i) => {
+                grid.innerHTML += `<div class="calendar-time">${hora}</div>`;
+                dias.forEach((dia, j) => {
+                    const id = `cell-${i}-${j}`;
+                    grid.innerHTML += `<div class="calendar-cell" id="${id}" data-hora="${hora}" data-dia="${dia}" onclick="openModal('${dia}', '${hora}', '${id}')">
+                        <span class="subject" style="color: #94a3b8;">Livre</span>
+                    </div>`;
+                });
+            });
+        }
+
+        async function loadHorarios(turmaId) {
+            horariosData = {};
+            const qs = await getDocs(query(collection(db, "horarios"), where("turmaId", "==", turmaId)));
+            qs.forEach(docSnap => {
+                const data = docSnap.data();
+                data.docId = docSnap.id;
+                horariosData[`${data.dia}-${data.hora}`] = data;
+            });
+            updateCalendarUI();
+        }
+
+        function updateCalendarUI() {
+            document.querySelectorAll('.calendar-cell').forEach(cell => {
+                const key = `${cell.getAttribute('data-dia')}-${cell.getAttribute('data-hora')}`;
+                if (horariosData[key]) {
+                    cell.classList.add('filled');
+                    cell.innerHTML = `
+                        <span class="subject">${horariosData[key].disciplina}</span>
+                        <span class="teacher">${horariosData[key].professorName || 'Prof'}</span>
+                    `;
+                } else {
+                    cell.classList.remove('filled');
+                    cell.innerHTML = '<span class="subject" style="color: #94a3b8;">Livre</span>';
+                }
+            });
+        }
+
+        // Modals
+        let professoresDataMap = {};
+
+        window.openModal = async function (dia, hora, cellId) {
+            document.getElementById('modalDia').value = dia;
+            document.getElementById('modalHora').value = hora;
+            document.getElementById('horarioModal').classList.add('active');
+
+            // Populate Profs
+            const selectProf = document.getElementById('modalProfessor');
+            const selectDisc = document.getElementById('modalDisciplina');
+            selectProf.innerHTML = '<option value="">A carregar...</option>';
+            selectDisc.innerHTML = '<option value="">Selecione o Professor primeiro...</option>';
+            selectDisc.disabled = true;
+
+            const qs = await getDocs(query(collection(db, "users"), where("role", "==", "professor")));
+            selectProf.innerHTML = '<option value="">Selecione o Professor...</option>';
+            professoresDataMap = {};
+            qs.forEach(docSnap => {
+                const data = docSnap.data();
+                professoresDataMap[data.uid] = data.disciplinas || [];
+                selectProf.innerHTML += `<option value="${data.uid}">${data.name}</option>`;
+            });
+
+            const key = `${dia}-${hora}`;
+            const btnRemover = document.getElementById('btnRemoverAula');
+            if (horariosData[key]) {
+                selectProf.value = horariosData[key].professorId;
+                selectProf.dispatchEvent(new Event('change')); // Trigger event to load disciplines
+                setTimeout(() => { selectDisc.value = horariosData[key].disciplina; }, 100);
+
+                btnRemover.style.display = 'block';
+                btnRemover.onclick = async () => {
+                    await deleteDoc(doc(db, "horarios", horariosData[key].docId));
+                    document.getElementById('horarioModal').classList.remove('active');
+                    loadHorarios(currentTurmaId);
+                };
+            } else {
+                selectDisc.value = "";
+                btnRemover.style.display = 'none';
+            }
+        };
+
+        document.getElementById('modalDia').addEventListener('change', (e) => {
+            window.openModal(e.target.value, document.getElementById('modalHora').value, null);
+        });
+        document.getElementById('modalHora').addEventListener('change', (e) => {
+            window.openModal(document.getElementById('modalDia').value, e.target.value, null);
+        });
+
+        // Lógica de Única Fonte de Verdade para Professor -> Disciplinas
+        document.getElementById('modalProfessor').addEventListener('change', function (e) {
+            const profId = e.target.value;
+            const selectDisc = document.getElementById('modalDisciplina');
+            selectDisc.innerHTML = '<option value="">Selecione a Disciplina...</option>';
+
+            if (!profId) {
+                selectDisc.disabled = true;
+                return;
+            }
+
+            const disciplinas = professoresDataMap[profId] || [];
+            if (disciplinas.length === 0) {
+                selectDisc.innerHTML = '<option value="">(Professor sem disciplinas cadastradas)</option>';
+                selectDisc.disabled = true;
+            } else if (disciplinas.length === 1) {
+                selectDisc.innerHTML = `<option value="${disciplinas[0]}" selected>${disciplinas[0]}</option>`;
+                selectDisc.disabled = true; // readonly form-wise
+                // Enable temporarily on submit to send the value, or rely on .value access
+            } else {
+                disciplinas.forEach(d => {
+                    selectDisc.innerHTML += `<option value="${d}">${d}</option>`;
+                });
+                selectDisc.disabled = false;
+            }
+        });
+
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('horarioModal').classList.remove('active');
+        });
+
+        document.getElementById('horarioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const dia = document.getElementById('modalDia').value;
+            const hora = document.getElementById('modalHora').value;
+            const disciplina = document.getElementById('modalDisciplina').value;
+            const profSelect = document.getElementById('modalProfessor');
+            const professorId = profSelect.value;
+            const professorName = profSelect.options[profSelect.selectedIndex].text;
+
+            const key = `${dia}-${hora}`;
+            const dataObj = { turmaId: currentTurmaId, dia, hora, disciplina, professorId, professorName };
+
+            try {
+                if (horariosData[key]) {
+                    // Update
+                    await setDoc(doc(db, "horarios", horariosData[key].docId), dataObj, { merge: true });
+                } else {
+                    // Create
+                    await addDoc(collection(db, "horarios"), dataObj);
+                }
+                document.getElementById('horarioModal').classList.remove('active');
+                loadHorarios(currentTurmaId);
+            } catch (e) { alert("Erro: " + e.message); }
+        });
+
+        // ----- INTEGRAÇÃO DO DASHBOARD MODERNO -----
+        async function loadDashboardStats() {
+            try {
+                // Total Alunos
+                const qAlunos = query(collection(db, "users"), where("role", "==", "aluno"));
+                const snapAlunos = await getDocs(qAlunos);
+                const totalAlunos = snapAlunos.size;
+                document.getElementById('dashTotalAlunos').innerText = totalAlunos;
+
+                // Total Professores
+                const qProfs = query(collection(db, "users"), where("role", "==", "professor"));
+                const snapProfs = await getDocs(qProfs);
+                const totalProfs = snapProfs.size;
+                document.getElementById('dashTotalProfessores').innerText = totalProfs;
+
+                // Total Turmas
+                const snapTurmas = await getDocs(collection(db, "turmas"));
+                const totalTurmas = snapTurmas.size;
+                document.getElementById('dashTotalTurmas').innerText = totalTurmas;
+
+                // Alertas e Pendências
+                const alertList = document.getElementById('dashAlertList');
+                alertList.innerHTML = '';
+                let alertasCriticosCount = 0;
+
+                // 1. Turmas sem alunos
+                const turmasData = [];
+                snapTurmas.forEach(t => turmasData.push({ id: t.id, nome: t.data().nome, turno: t.data().turno || 'Desconhecido' }));
+
+                for (let turma of turmasData) {
+                    const qA = query(collection(db, "users"), where("role", "==", "aluno"), where("turmaId", "==", turma.id));
+                    const snapA = await getDocs(qA);
+                    if (snapA.empty) {
+                        alertasCriticosCount++;
+                        alertList.innerHTML += `
+                            <li class="alert-item warn">
+                                <i class="fa-solid fa-triangle-exclamation" style="color: #d97706;"></i>
+                                <div class="content">
+                                    <h5>Turma sem Alunos</h5>
+                                    <p>A turma ${turma.nome} não possui alunos matriculados.</p>
+                                </div>
+                            </li>
+                        `;
+                    }
+                }
+
+                // 2. Turmas sem horários
+                for (let turma of turmasData) {
+                    const qH = query(collection(db, "horarios"), where("turmaId", "==", turma.id));
+                    const snapH = await getDocs(qH);
+                    if (snapH.empty) {
+                        alertasCriticosCount++;
+                        alertList.innerHTML += `
+                            <li class="alert-item">
+                                <i class="fa-solid fa-circle-exclamation" style="color: #ef4444;"></i>
+                                <div class="content">
+                                    <h5>Turma sem Horários</h5>
+                                    <p>A turma ${turma.nome} não possui horários atribuídos na grelha.</p>
+                                </div>
+                            </li>
+                        `;
+                    }
+                }
+
+                if (alertList.innerHTML === '') {
+                    alertList.innerHTML = `
+                        <li class="alert-item info">
+                            <i class="fa-solid fa-circle-check" style="color: #10b981;"></i>
+                            <div class="content">
+                                <h5>Tudo em Ordem</h5>
+                                <p>Nenhum alerta crítico ou pendência encontrada no sistema.</p>
+                            </div>
+                        </li>
+                    `;
+                }
+
+                // Atualiza contagem de alertas críticos
+                document.getElementById('dashAlertasCriticos').innerText = alertasCriticosCount;
+
+                // ------------------
+                // GRÁFICOS (Chart.js)
+                // ------------------
+
+                // 1. Gráfico de Rosca: Distribuição de Utilizadores
+                const qPais = query(collection(db, "users"), where("role", "==", "pais"));
+                const snapPais = await getDocs(qPais);
+                const totalPais = snapPais.size;
+
+                const ctxRoles = document.getElementById('userRolesChart').getContext('2d');
+                new Chart(ctxRoles, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Alunos', 'Professores', 'Pais/Resp.'],
+                        datasets: [{
+                            data: [totalAlunos, totalProfs, totalPais],
+                            backgroundColor: ['#007bff', '#10b981', '#d4af37'],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } }
+                        },
+                        cutout: '70%'
+                    }
+                });
+
+                // 2. Gráfico de Barras: Alunos por Turno
+                let turnoCounts = {};
+
+                // Agrupar alunos pelas turmas e os seus respetivos turnos
+                for (let turma of turmasData) {
+                    const turnoStr = turma.turno;
+
+                    const qA = query(collection(db, "users"), where("role", "==", "aluno"), where("turmaId", "==", turma.id));
+                    const snapA = await getDocs(qA);
+
+                    if (turnoCounts[turnoStr] !== undefined) {
+                        turnoCounts[turnoStr] += snapA.size;
+                    } else {
+                        turnoCounts[turnoStr] = snapA.size;
+                    }
+                }
+
+                const ctxTurno = document.getElementById('alunosPorTurnoChart').getContext('2d');
+                new Chart(ctxTurno, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(turnoCounts),
+                        datasets: [{
+                            label: 'Qtd de Alunos',
+                            data: Object.values(turnoCounts),
+                            backgroundColor: 'rgba(13, 43, 86, 0.85)', // var(--primary-color)
+                            borderRadius: 6,
+                            barPercentage: 0.6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { precision: 0 }, grid: { borderDash: [4, 4] } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erro ao carregar dashboard:", error);
+                document.getElementById('dashAlertList').innerHTML = `
+                    <li class="alert-item">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i>
+                        <div class="content">
+                            <h5>Erro de Carregamento</h5>
+                            <p>Falha ao conectar à base de dados. Recarregue a página.</p>
+                        </div>
+                    </li>
+                `;
+            }
+        }
+
+        async function loadRelatorios() {
+            const select = document.getElementById('relatoriosTurmaSelect');
+            select.innerHTML = '<option value="">Todas as Turmas</option>';
+            try {
+                const qsTurmas = await getDocs(collection(db, "turmas"));
+                const turmasMap = {};
+                qsTurmas.forEach(docSnap => {
+                    turmasMap[docSnap.id] = docSnap.data().nome;
+                    select.innerHTML += `<option value="${docSnap.id}">${docSnap.data().nome}</option>`;
+                });
+
+                const professoresMap = {};
+                const qsProfs = await getDocs(query(collection(db, "users"), where("role", "==", "professor")));
+                qsProfs.forEach(d => professoresMap[d.data().uid] = d.data().name);
+
+                const alunosMap = {};
+                const qsAlunos = await getDocs(query(collection(db, "users"), where("role", "==", "aluno")));
+                qsAlunos.forEach(d => alunosMap[d.data().uid] = d.data().name);
+
+                await carregarTabelaAuditoria(turmasMap, professoresMap, alunosMap, "");
+
+                select.onchange = (e) => {
+                    carregarTabelaAuditoria(turmasMap, professoresMap, alunosMap, e.target.value);
+                };
+            } catch (error) { console.error(error); }
+        }
+
+        async function carregarTabelaAuditoria(turmasMap, professoresMap, alunosMap, turmaIdFilter) {
+            const tbody = document.querySelector('#diariosAuditTable tbody');
+            tbody.innerHTML = '<tr><td colspan="6">A carregar...</td></tr>';
+            try {
+                let qDiarios;
+                if (turmaIdFilter) {
+                    qDiarios = query(collection(db, "diario"), where("turmaId", "==", turmaIdFilter));
+                } else {
+                    qDiarios = query(collection(db, "diario"));
+                }
+                const qs = await getDocs(qDiarios);
+
+                if (qs.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6">Nenhum registo encontrado.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+
+                let diariosList = [];
+                qs.forEach(d => diariosList.push({ id: d.id, ...d.data() }));
+                diariosList.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+                // Save list to window for modal access
+                window.currentDiariosList = diariosList;
+                window.currentAlunosMap = alunosMap;
+
+                diariosList.forEach((data, index) => {
+                    let presencasCount = 0;
+                    let faltasCount = 0;
+                    if (data.chamadas) {
+                        Object.values(data.chamadas).forEach(v => {
+                            if (v === 'Presente') presencasCount++;
+                            if (v === 'Falta') faltasCount++;
+                        });
+                    }
+                    const turmaNome = turmasMap[data.turmaId] || "Desconhecida";
+                    const profNome = professoresMap[data.professorId] || data.professorName || 'N/A';
+
+                    const dParts = data.data ? data.data.split("-") : [];
+                    const dateStr = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}/${dParts[0]}` : (data.data || "N/A");
+
+                    const tr = document.createElement('tr');
+                    tr.style.cursor = 'pointer';
+                    tr.style.transition = 'background 0.2s';
+                    tr.innerHTML = `
+                        <td>${dateStr}</td>
+                        <td>${turmaNome}</td>
+                        <td>${data.disciplina || '-'}</td>
+                        <td>${profNome}</td>
+                        <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.sumario || '-'}</td>
+                        <td><span style="color: #16a34a; font-weight: 600;">${presencasCount}</span> / <span style="color: #dc2626; font-weight: 600;">${faltasCount}</span></td>
+                    `;
+                    tr.onclick = () => openDiarioModal(index, turmaNome, profNome, dateStr);
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="6">Erro ao carregar dados.</td></tr>';
+            }
+        }
+
+        window.openDiarioModal = function (index, turmaNome, profNome, dateStr) {
+            const data = window.currentDiariosList[index];
+            document.getElementById('mdlDiarioData').innerText = dateStr;
+            document.getElementById('mdlDiarioTurma').innerText = turmaNome;
+            document.getElementById('mdlDiarioDisciplina').innerText = data.disciplina || '-';
+            document.getElementById('mdlDiarioProfessor').innerText = profNome;
+            document.getElementById('mdlDiarioSumario').innerText = data.sumario || 'Sem sumário.';
+
+            const ul = document.getElementById('mdlDiarioAlunos');
+            ul.innerHTML = '';
+
+            if (data.chamadas && Object.keys(data.chamadas).length > 0) {
+                Object.keys(data.chamadas).forEach(alunoId => {
+                    const status = data.chamadas[alunoId];
+                    const nome = window.currentAlunosMap[alunoId] || 'Aluno Desconhecido';
+                    const color = status === 'Presente' ? '#16a34a' : '#dc2626';
+                    const label = status === 'Presente' ? 'Presente' : 'Falta';
+                    ul.innerHTML += `<li style="padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
+                        <span>${nome}</span>
+                        <span style="color: ${color}; font-weight: 600;">${label}</span>
+                    </li>`;
+                });
+            } else {
+                ul.innerHTML = '<li>Nenhum registo de chamada efetuado.</li>';
+            }
+
+            document.getElementById('diarioDetalheModal').classList.add('active');
+        };
+
+        document.getElementById('closeDiarioModal').addEventListener('click', () => {
+            document.getElementById('diarioDetalheModal').classList.remove('active');
+        });
+
+        // --- SUB-TABS TURMAS E DISCIPLINAS ---
+        document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.sub-tab-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.style.color = '#64748b';
+                    b.style.borderBottom = 'none';
+                });
+
+                e.currentTarget.classList.add('active');
+                e.currentTarget.style.color = 'var(--primary-color)';
+                e.currentTarget.style.borderBottom = '3px solid var(--primary-color)';
+
+                document.querySelectorAll('.sub-tab-content').forEach(c => {
+                    c.classList.remove('active');
+                    c.style.display = 'none';
+                });
+
+                const targetId = e.currentTarget.getAttribute('data-subtab');
+                const targetEl = document.getElementById(targetId);
+                targetEl.classList.add('active');
+                targetEl.style.display = 'block';
+
+                if (targetId === 'sub-turmas-existentes') loadTurmasExistentes();
+                if (targetId === 'sub-alunos-turma') loadAlunosPorTurma();
+                if (targetId === 'sub-relatorios-auditoria') document.querySelector('.tab-link[data-tab="tab-relatorios"]').click(); // trigger logic
+            });
+        });
+
+        async function loadTurmasExistentes() {
+            const tbody = document.querySelector('#turmasExistentesTable tbody');
+            tbody.innerHTML = '<tr><td colspan="3">A carregar...</td></tr>';
+            try {
+                const qs = await getDocs(query(collection(db, "turmas")));
+                if (qs.empty) {
+                    tbody.innerHTML = '<tr><td colspan="3">Nenhuma turma registada.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+
+                let turmasList = [];
+                qs.forEach(d => turmasList.push({ id: d.id, ...d.data() }));
+                // sort by createdAt if exists, or name
+                turmasList.sort((a, b) => {
+                    if (a.createdAt && b.createdAt) return b.createdAt.toDate() - a.createdAt.toDate();
+                    return a.nome.localeCompare(b.nome);
+                });
+
+                turmasList.forEach(data => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0;"><strong>${data.nome}</strong></td>
+                            <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0;">${data.serie || '-'}</td>
+                            <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0;">${data.turno || '-'}</td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="3">Erro ao carregar turmas.</td></tr>';
+            }
+        }
+
+        async function loadAlunosPorTurma() {
+            const select = document.getElementById('alunosPorTurmaSelect');
+            const tbody = document.querySelector('#alunosPorTurmaTable tbody');
+
+            // Populate select if empty
+            if (select.options.length <= 1) {
+                try {
+                    const qs = await getDocs(collection(db, "turmas"));
+                    select.innerHTML = '<option value="">Selecione uma turma</option>';
+                    qs.forEach(docSnap => {
+                        select.innerHTML += `<option value="${docSnap.id}">${docSnap.data().nome}</option>`;
+                    });
+                } catch (error) { console.error(error); }
+            }
+
+            select.onchange = async (e) => {
+                const turmaId = e.target.value;
+                if (!turmaId) {
+                    tbody.innerHTML = '<tr><td colspan="2">Selecione uma turma para ver os alunos.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '<tr><td colspan="2">A carregar alunos...</td></tr>';
+                try {
+                    const qA = query(collection(db, "users"), where("role", "==", "aluno"), where("turmaId", "==", turmaId));
+                    const qsA = await getDocs(qA);
+                    if (qsA.empty) {
+                        tbody.innerHTML = '<tr><td colspan="2">Sem alunos nesta turma.</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = '';
+
+                    // Pre-fetch turmas map for modal
+                    const qsT = await getDocs(collection(db, "turmas"));
+                    let turmasMap = {};
+                    qsT.forEach(d => turmasMap[d.id] = d.data().nome);
+
+                    qsA.forEach(docSnap => {
+                        const data = docSnap.data();
+                        const tr = document.createElement('tr');
+                        tr.style.cursor = 'pointer';
+                        tr.style.transition = 'background 0.2s';
+                        tr.innerHTML = `
+                            <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; vertical-align: middle;"><strong>${data.name}</strong></td>
+                            <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; vertical-align: middle;">${data.matricula || '-'}</td>
+                        `;
+                        tr.onclick = () => openAlunoPerfilModal(data, turmasMap[data.turmaId] || 'Sem turma');
+                        tbody.appendChild(tr);
+                    });
+                } catch (error) {
+                    console.error(error);
+                    tbody.innerHTML = '<tr><td colspan="2">Erro ao carregar alunos.</td></tr>';
+                }
+            };
+        }
+
+        async function openAlunoPerfilModal(alunoData, turmaNome) {
+            document.getElementById('mdlAlunoNome').innerText = alunoData.name || '-';
+            document.getElementById('mdlAlunoMatricula').innerText = alunoData.matricula || '-';
+            document.getElementById('mdlAlunoEmail').innerText = alunoData.email || '-';
+            document.getElementById('mdlAlunoTelefone').innerText = alunoData.telefone || 'Não informado';
+            document.getElementById('mdlAlunoEndereco').innerText = alunoData.endereco || 'Não informado';
+            document.getElementById('mdlAlunoTurma').innerText = turmaNome;
+
+            const tbody = document.querySelector('#mdlAlunoBoletimTable tbody');
+            tbody.innerHTML = '<tr><td colspan="6" style="padding: 1.25rem 1rem;">A carregar boletim...</td></tr>';
+
+            document.getElementById('alunoPerfilModal').classList.add('active');
+
+            try {
+                const qN = query(collection(db, "notas"), where("alunoId", "==", alunoData.uid));
+                const qsN = await getDocs(qN);
+
+                if (qsN.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 1.25rem 1rem; color: #64748b;">Nenhuma nota registada.</td></tr>';
+                    return;
+                }
+
+                let disciplinasNotas = {}; // { 'Matemática': { '1º Bimestre': 8, ... } }
+                qsN.forEach(d => {
+                    const n = d.data();
+                    if (!disciplinasNotas[n.disciplina]) disciplinasNotas[n.disciplina] = {};
+                    disciplinasNotas[n.disciplina][n.bimestre] = n.nota;
+                });
+
+                tbody.innerHTML = '';
+                for (const [disc, bimestres] of Object.entries(disciplinasNotas)) {
+                    let b1 = bimestres['1º Bimestre'] !== undefined ? bimestres['1º Bimestre'] : '-';
+                    let b2 = bimestres['2º Bimestre'] !== undefined ? bimestres['2º Bimestre'] : '-';
+                    let b3 = bimestres['3º Bimestre'] !== undefined ? bimestres['3º Bimestre'] : '-';
+                    let b4 = bimestres['4º Bimestre'] !== undefined ? bimestres['4º Bimestre'] : '-';
+
+                    let count = 0;
+                    let sum = 0;
+                    if (b1 !== '-') { sum += parseFloat(b1); count++; }
+                    if (b2 !== '-') { sum += parseFloat(b2); count++; }
+                    if (b3 !== '-') { sum += parseFloat(b3); count++; }
+                    if (b4 !== '-') { sum += parseFloat(b4); count++; }
+
+                    let media = count > 0 ? (sum / count).toFixed(1) : '-';
+                    let mediaColor = media !== '-' ? (media >= 6 ? '#16a34a' : '#dc2626') : 'inherit';
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="padding: 1rem; border-bottom: 1px solid #e2e8f0; vertical-align: middle;"><strong>${disc}</strong></td>
+                            <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #e2e8f0;">${b1}</td>
+                            <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #e2e8f0;">${b2}</td>
+                            <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #e2e8f0;">${b3}</td>
+                            <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #e2e8f0;">${b4}</td>
+                            <td style="text-align: center; padding: 1rem; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: ${mediaColor};">${media}</td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="6" style="padding: 1.25rem 1rem;">Erro ao carregar boletim.</td></tr>';
+            }
+        }
+
+        document.getElementById('closeAlunoPerfilModal').addEventListener('click', () => {
+            document.getElementById('alunoPerfilModal').classList.remove('active');
+        });
+
+        document.querySelector('.tab-link[data-tab="tab-relatorios"]').addEventListener('click', () => {
+            if (document.getElementById('sub-turmas-existentes').classList.contains('active')) {
+                loadTurmasExistentes();
+            }
+        });
+
+        // Load stats on init
+        loadDashboardStats();
+    </script>
+</body>
+
+</html>
