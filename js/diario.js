@@ -1,9 +1,9 @@
 // Diário de Classe — módulo partilhado entre o Painel do Coordenador e o Portal do Docente.
 //
-// Coleção Firestore "diario" (um documento por Turma + Data + Disciplina):
+// Coleção Firestore "diarios" (um documento por Turma + Data + Disciplina):
 //   { turmaId, turmaNome, data: "AAAA-MM-DD", disciplina, professorId, professorName,
-//     conteudo, observacoes, presencas: { [alunoUid]: "P" | "F" }, alunos: { [alunoUid]: nome },
-//     totalAlunos, totalPresentes, createdAt, updatedAt }
+//     conteudo, sumario, observacoes, presencas: { [alunoUid]: "P" | "F" }, chamadas: { [alunoUid]: "Presente" | "Falta" },
+//     alunos: { [alunoUid]: nome }, totalAlunos, totalPresentes, createdAt, updatedAt }
 import { db } from './firebase-config.js';
 import { collection, query, where, getDocs, doc, getDoc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 import { esc, parseDisciplinas } from './auth-utils.js';
@@ -191,7 +191,7 @@ export function initDiario(container, { profile, isAdmin }) {
 
         const docId = `${turmaId}_${data}_${slug(disciplina)}`;
         const [snap, alunosQs] = await Promise.all([
-            getDoc(doc(db, "diario", docId)),
+            getDoc(doc(db, "diarios", docId)),
             getDocs(query(collection(db, "users"), where("role", "==", "aluno"), where("turmaId", "==", turmaId)))
         ]);
 
@@ -278,15 +278,22 @@ export function initDiario(container, { profile, isAdmin }) {
 
         const alunosMap = {};
         atual.alunos.forEach(a => alunosMap[a.uid] = a.name);
+        const chamadasMap = {};
+        Object.entries(atual.presencas).forEach(([uid, v]) => {
+            chamadasMap[uid] = v === 'P' ? 'Presente' : 'Falta';
+        });
+        const conteudoTexto = $('dcConteudo').value.trim();
         const payload = {
             turmaId: atual.turmaId,
             turmaNome: turmas[atual.turmaId]?.nome || '',
             data: atual.data,
             disciplina: atual.disciplina,
             professorId, professorName,
-            conteudo: $('dcConteudo').value.trim(),
+            conteudo: conteudoTexto,
+            sumario: conteudoTexto,
             observacoes: $('dcObs').value.trim(),
             presencas: atual.presencas,
+            chamadas: chamadasMap,
             alunos: alunosMap,
             totalAlunos: atual.alunos.length,
             totalPresentes: Object.values(atual.presencas).filter(v => v === 'P').length,
@@ -295,7 +302,7 @@ export function initDiario(container, { profile, isAdmin }) {
         if (!atual.existe) payload.createdAt = serverTimestamp();
 
         try {
-            await setDoc(doc(db, "diario", atual.docId), payload, { merge: true });
+            await setDoc(doc(db, "diarios", atual.docId), payload, { merge: true });
             atual.existe = true;
             $('dcEliminar').style.display = 'inline-block';
             alert('Registo do diário guardado com sucesso!');
@@ -309,7 +316,7 @@ export function initDiario(container, { profile, isAdmin }) {
 
     $('dcEliminar').addEventListener('click', async () => {
         if (!atual?.existe || !confirm('Deseja eliminar este registo do diário?')) return;
-        await deleteDoc(doc(db, "diario", atual.docId));
+        await deleteDoc(doc(db, "diarios", atual.docId));
         $('dcRegisto').style.display = 'none';
         atual = null;
         carregarHistorico();
@@ -323,7 +330,7 @@ export function initDiario(container, { profile, isAdmin }) {
             const filtros = [];
             if (selTurma.value) filtros.push(where("turmaId", "==", selTurma.value));
             if (!isAdmin) filtros.push(where("professorId", "==", meuUid));
-            const qs = await getDocs(filtros.length ? query(collection(db, "diario"), ...filtros) : collection(db, "diario"));
+            const qs = await getDocs(filtros.length ? query(collection(db, "diarios"), ...filtros) : collection(db, "diarios"));
 
             const regs = qs.docs.map(d => d.data()).sort((a, b) => (b.data || '').localeCompare(a.data || ''));
             if (!regs.length) {

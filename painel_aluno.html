@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,39 +8,62 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
     <div class="dashboard-container">
         <!-- Sidebar Somente Leitura -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="logo-container">
-                <i class="fa-solid fa-graduation-cap" style="font-size: 1.5rem;"></i>
-                <span>COLÉGIO VERAS</span>
+                <div class="logo-brand">
+                    <i class="fa-solid fa-graduation-cap" style="font-size: 1.5rem;"></i>
+                    <span>COLÉGIO VERAS</span>
+                </div>
+                <button type="button" class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Fechar menu">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
             <ul class="sidebar-menu">
-                <li><a href="#" class="tab-link active" data-tab="tab-dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>
-                <li><a href="#" class="tab-link" data-tab="tab-boletim"><i class="fa-solid fa-file-lines"></i> Boletim</a></li>
-                <li><a href="#" class="tab-link" data-tab="tab-horarios"><i class="fa-solid fa-calendar-days"></i> Meu Horário</a></li>
-                <li><a href="#" class="tab-link" data-tab="tab-atividades"><i class="fa-solid fa-clipboard-check"></i> Atividades</a></li>
-                <li style="margin-top: auto;"><a href="#" id="logoutBtn" style="color: #fca5a5; background: rgba(239, 68, 68, 0.1);"><i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a></li>
+                <li><a href="#" class="tab-link active" data-tab="tab-dashboard"><i class="fa-solid fa-chart-pie"></i>
+                        Dashboard</a></li>
+                <li><a href="#" class="tab-link" data-tab="tab-boletim"><i class="fa-solid fa-file-lines"></i>
+                        Boletim</a></li>
+                <li><a href="#" class="tab-link" data-tab="tab-horarios"><i class="fa-solid fa-calendar-days"></i> Meu
+                        Horário</a></li>
+                <li><a href="#" class="tab-link" data-tab="tab-atividades"><i class="fa-solid fa-clipboard-check"></i>
+                        Atividades</a></li>
+                <li style="margin-top: auto;"><a href="#" id="logoutBtn"
+                        style="color: #fca5a5; background: rgba(239, 68, 68, 0.1);"><i
+                            class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a></li>
             </ul>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
             <header class="header">
-                <h2>Painel do Aluno</h2>
+                <div class="header-left">
+                    <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h2>Painel do Aluno</h2>
+                </div>
                 <div class="user-info">
                     <span id="studentName">A carregar...</span>
-                    <i class="fa-solid fa-circle-user" style="font-size: 2rem; color: #0f172a;"></i>
+                    <i class="fa-solid fa-circle-user" style="font-size: 2rem; color: var(--primary-color);"></i>
                 </div>
             </header>
 
-            <div id="welcomeMessage" style="margin-bottom: 2rem; font-size: 1.1rem; color: #475569;">
-                Bem-vindo. A visualizar dados de: <strong id="studentInfoName" style="color: #0f172a;">...</strong>
-                <span id="turmaInfo" style="margin-left: 10px; padding: 4px 12px; background: #e0f2fe; color: #0284c7; border-radius: 999px; font-size: 0.9rem; font-weight: 600;">Turma: ...</span>
+            <div id="welcomeMessage"
+                style="margin-bottom: 1.75rem; font-size: 1.05rem; color: #475569; display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem;">
+                <span>Bem-vindo(a). A visualizar dados de: <strong id="studentInfoName"
+                        style="color: #0f172a;">...</strong></span>
+                <span id="turmaInfo"
+                    style="padding: 4px 12px; background: #e0f2fe; color: #0284c7; border-radius: 999px; font-size: 0.88rem; font-weight: 700;">Turma:
+                    ...</span>
             </div>
 
-            <!-- TAB: DASHBOARD (Esqueleto) -->
+            <!-- TAB: DASHBOARD -->
             <div id="tab-dashboard" class="tab-content active">
                 <div class="dash-grid">
                     <div class="dash-widget red">
@@ -64,31 +88,35 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="panel-card">
-                    <h3 style="color: #0f172a;"><i class="fa-solid fa-bullhorn"></i> Avisos Recentes</h3>
-                    <p style="color: #64748b;">Nenhum aviso novo por enquanto.</p>
+                    <h3><i class="fa-solid fa-bullhorn" style="color: var(--primary-color);"></i> Avisos Recentes</h3>
+                    <div id="muralAvisosAluno" class="aviso-list">
+                        <p style="color: #64748b;">A carregar avisos...</p>
+                    </div>
                 </div>
             </div>
 
             <!-- TAB: BOLETIM -->
             <div id="tab-boletim" class="tab-content">
-                <div class="panel-card" style="padding: 2rem;">
-                    <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; color: #0f172a; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-file-lines" style="color: var(--primary-color);"></i> Meu Boletim Escolar
+                <div class="panel-card">
+                    <h3><i class="fa-solid fa-file-lines" style="color: var(--primary-color);"></i> Meu Boletim Escolar
                     </h3>
-                    
-                    <div style="border-radius: 12px; border: 1px solid var(--admin-border); overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; background: #fff;">
+
+                    <div class="table-responsive">
+                        <table>
                             <thead>
                                 <tr>
-                                    <th style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: left;">Disciplina</th>
-                                    <th style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: left;">Bimestre</th>
-                                    <th style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: center; width: 150px;">Nota</th>
+                                    <th>Disciplina</th>
+                                    <th>Bimestre</th>
+                                    <th style="text-align: center; width: 150px;">Nota</th>
                                 </tr>
                             </thead>
                             <tbody id="boletimNotasTable">
-                                <tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar o seu boletim...</td></tr>
+                                <tr>
+                                    <td colspan="3" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar
+                                        o seu boletim...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -98,49 +126,56 @@
             <!-- TAB: HORÁRIOS -->
             <div id="tab-horarios" class="tab-content">
                 <div class="panel-card">
-                    <h3 style="color: #0f172a;"><i class="fa-solid fa-calendar-days"></i> Meu Horário Semanal</h3>
-                    
-                    <div id="calendarContainer" style="display: none; margin-top: 2rem;">
-                        <div class="calendar-grid" id="alunoCalendarGrid"></div>
+                    <h3><i class="fa-solid fa-calendar-days" style="color: var(--primary-color);"></i> Meu Horário
+                        Semanal</h3>
+
+                    <div id="calendarContainer" style="display: none; margin-top: 1.5rem;">
+                        <div class="calendar-scroll">
+                            <div class="calendar-grid" id="alunoCalendarGrid"></div>
+                        </div>
                     </div>
-                    <p id="noHorarioMsg" style="color: #64748b; display: none;">O horário desta turma ainda não foi definido.</p>
+                    <p id="noHorarioMsg" style="color: #64748b; display: none; margin-top: 1rem;">O horário desta turma
+                        ainda não foi definido.</p>
                 </div>
             </div>
 
             <!-- TAB: ATIVIDADES -->
             <div id="tab-atividades" class="tab-content">
-                <div class="panel-card" style="padding: 2rem;">
-                    <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; color: #0f172a; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-clipboard-check" style="color: var(--primary-color);"></i> Minhas Atividades
-                    </h3>
-                    
-                    <div style="margin-bottom: 2rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; font-size: 0.95rem;">Selecionar Disciplina:</label>
-                        <select id="atividadesDisciplinaSelectAluno" style="width: 100%; max-width: 400px; padding: 0.85rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 1rem; outline: none; background: #f8fafc;">
+                <div class="panel-card">
+                    <h3><i class="fa-solid fa-clipboard-check" style="color: var(--primary-color);"></i> Minhas
+                        Atividades</h3>
+
+                    <div class="form-group" style="max-width: 400px; margin-bottom: 1.5rem;">
+                        <label>Selecionar Disciplina:</label>
+                        <select id="atividadesDisciplinaSelectAluno">
                             <option value="">A carregar disciplinas...</option>
                         </select>
                     </div>
 
-                    <!-- NOVO: Sub-abas para Casa e Sala, oculto por padrão -->
                     <div id="alunoAtividadesSubtabs" style="display: none; margin-bottom: 1.5rem;">
                         <nav class="subtab-nav">
-                            <button class="subtab-link" data-tipo="casa"><i class="fa-solid fa-house"></i> Atividades de Casa</button>
-                            <button class="subtab-link" data-tipo="sala"><i class="fa-solid fa-school"></i> Atividades de Sala</button>
+                            <button type="button" class="subtab-link" data-tipo="casa"><i
+                                    class="fa-solid fa-house"></i> Atividades de Casa</button>
+                            <button type="button" class="subtab-link" data-tipo="sala"><i
+                                    class="fa-solid fa-school"></i> Atividades de Sala</button>
                         </nav>
                     </div>
 
                     <div id="atividadesListaAlunoContainer" style="display: none;">
-                        <div style="border-radius: 12px; border: 1px solid var(--admin-border); overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; background: #fff;">
+                        <div class="table-responsive">
+                            <table>
                                 <thead>
                                     <tr>
-                                        <th style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: left;">Descrição</th>
-                                        <th style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: left; width: 100px;">Tipo</th>
-                                        <th style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: center; width: 150px;">Status</th>
+                                        <th>Descrição</th>
+                                        <th style="width: 110px;">Tipo</th>
+                                        <th style="text-align: center; width: 140px;">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="atividadesListaAluno">
-                                    <tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#64748b;">Selecione uma categoria acima.</td></tr>
+                                    <tr>
+                                        <td colspan="3" style="padding:1.5rem; text-align:center; color:#64748b;">
+                                            Selecione uma categoria acima.</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -151,265 +186,469 @@
     </div>
 
     <!-- MODAL DE ATIVIDADE -->
-    <div class="modal-overlay" id="atividadeModalAluno">
+    <div class="modal-overlay" id="atividadeModalAluno" role="dialog" aria-modal="true"
+        aria-labelledby="modalAtividadeTitulo">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h3 style="display: flex; align-items: center; gap: 10px;"><i class="fa-solid fa-book-open"></i> Detalhes da Atividade</h3>
-                <button class="modal-close" onclick="fecharModalAtividade()"><i class="fa-solid fa-xmark"></i></button>
+                <h3 id="modalAtividadeTitulo" style="display: flex; align-items: center; gap: 10px; margin: 0;"><i
+                        class="fa-solid fa-book-open"></i> Detalhes da Atividade</h3>
+                <button type="button" class="modal-close" id="closeAtividadeModalBtn"
+                    onclick="fecharModalAtividade()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="modal-body" style="padding: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem;">
+            <div class="modal-body">
+                <div
+                    style="display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem;">
                     <div>
-                        <span id="modalAtividadeDisciplina" style="font-weight: 700; color: #0f172a; font-size: 1.1rem; display: block;"></span>
+                        <span id="modalAtividadeDisciplina"
+                            style="font-weight: 700; color: #0f172a; font-size: 1.1rem; display: block;"></span>
                         <span id="modalAtividadeTipo" style="font-size: 0.9rem; margin-top: 0.25rem; display: block;"></span>
                     </div>
                     <div style="text-align: right;">
-                        <span id="modalAtividadeData" style="font-size: 0.85rem; color: #64748b; display: block; margin-bottom: 0.25rem;"></span>
+                        <span id="modalAtividadeData"
+                            style="font-size: 0.85rem; color: #64748b; display: block; margin-bottom: 0.35rem;"></span>
                         <span id="modalAtividadeStatus"></span>
                     </div>
                 </div>
-                <div style="background: #f8fafc; border-radius: 8px; padding: 1.5rem; border: 1px solid #e2e8f0;">
-                    <p id="modalAtividadeDescricao" style="white-space: pre-wrap; color: #334155; line-height: 1.6;"></p>
+                <div style="background: #f8fafc; border-radius: 12px; padding: 1.25rem; border: 1px solid #e2e8f0;">
+                    <p id="modalAtividadeDescricao"
+                        style="white-space: pre-wrap; color: #334155; line-height: 1.6; margin: 0;"></p>
                 </div>
             </div>
-            <div class="modal-footer" style="padding: 1.5rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
-                <button class="btn" style="background: #e2e8f0; color: #475569; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600;" onclick="fecharModalAtividade()">Fechar</button>
+            <div class="modal-footer"
+                style="padding-top: 1.25rem; margin-top: 1.25rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
+                <button type="button" class="btn" id="fecharAtividadeModalFooterBtn"
+                    style="background: #e2e8f0; color: #475569; border: none; padding: 0.75rem 1.5rem; border-radius: 10px; cursor: pointer; font-weight: 600;"
+                    onclick="fecharModalAtividade()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE AVISO -->
+    <div class="modal-overlay" id="avisoModalAluno" role="dialog" aria-modal="true" aria-labelledby="modalAvisoTitulo">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="modalAvisoTitulo" style="margin: 0; font-size: 1.3rem;">Comunicado</h3>
+                <button type="button" class="modal-close" id="closeAvisoModalBtn" onclick="fecharModalAviso()"
+                    aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div
+                style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap; margin-bottom: 1rem; padding-bottom: 0.85rem; border-bottom: 1px solid #e2e8f0;">
+                <span id="modalAvisoPrioridade"></span>
+                <span id="modalAvisoTarget" class="chip"></span>
+                <span id="modalAvisoAutor" style="font-size: 0.85rem; color: #475569;"></span>
+                <span id="modalAvisoData" style="font-size: 0.82rem; color: #64748b; margin-left: auto;"></span>
+            </div>
+            <div style="background: #f8fafc; border-radius: 12px; padding: 1.25rem; border: 1px solid #e2e8f0;">
+                <p id="modalAvisoMensagem"
+                    style="white-space: pre-wrap; color: #334155; line-height: 1.65; margin: 0;"></p>
+            </div>
+            <div
+                style="padding-top: 1.25rem; margin-top: 1.25rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
+                <button type="button" class="btn" id="fecharAvisoModalFooterBtn"
+                    style="background: #e2e8f0; color: #475569; border: none; padding: 0.75rem 1.5rem; border-radius: 10px; cursor: pointer; font-weight: 600;"
+                    onclick="fecharModalAviso()">Fechar</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { auth, db } from './js/firebase-config.js';
+        import { esc } from './js/auth-utils.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
-        // TAB NAVIGATION
+        // --- FUNÇÕES GLOBAIS DE MODAIS ---
+        window.fecharModalAtividade = function () {
+            const modal = document.getElementById('atividadeModalAluno');
+            if (modal) modal.classList.remove('active');
+        };
+
+        window.fecharModalAviso = function () {
+            const modal = document.getElementById('avisoModalAluno');
+            if (modal) modal.classList.remove('active');
+        };
+
+        document.getElementById('closeAtividadeModalBtn')?.addEventListener('click', window.fecharModalAtividade);
+        document.getElementById('fecharAtividadeModalFooterBtn')?.addEventListener('click', window.fecharModalAtividade);
+        document.getElementById('atividadeModalAluno')?.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) window.fecharModalAtividade();
+        });
+
+        document.getElementById('closeAvisoModalBtn')?.addEventListener('click', window.fecharModalAviso);
+        document.getElementById('fecharAvisoModalFooterBtn')?.addEventListener('click', window.fecharModalAviso);
+        document.getElementById('avisoModalAluno')?.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) window.fecharModalAviso();
+        });
+
+        // --- MOBILE SIDEBAR ---
+        const sidebarEl = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+        function setSidebarOpen(open) {
+            if (!sidebarEl || !sidebarBackdrop) return;
+            sidebarEl.classList.toggle('open', open);
+            sidebarBackdrop.classList.toggle('active', open);
+        }
+
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => setSidebarOpen(true));
+        document.getElementById('sidebarCloseBtn')?.addEventListener('click', () => setSidebarOpen(false));
+        sidebarBackdrop?.addEventListener('click', () => setSidebarOpen(false));
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                window.fecharModalAtividade();
+                window.fecharModalAviso();
+                setSidebarOpen(false);
+            }
+        });
+
+        // --- TAB NAVIGATION ---
         document.querySelectorAll('.tab-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
+                const targetId = e.currentTarget.getAttribute('data-tab');
+                if (!targetId) return;
+                const targetEl = document.getElementById(targetId);
+                if (!targetEl) return;
+
                 document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
                 e.currentTarget.classList.add('active');
-                const targetId = e.currentTarget.getAttribute('data-tab');
-                document.getElementById(targetId).classList.add('active');
+                targetEl.classList.add('active');
+                setSidebarOpen(false);
             });
         });
 
-        // AUTH & CARREGAMENTO DE DADOS
+        document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            signOut(auth).then(() => window.location.href = 'portais.html');
+        });
+
+        function formatDateValue(val) {
+            if (!val) return "Data não disponível";
+            try {
+                if (typeof val.toDate === 'function') return val.toDate().toLocaleDateString('pt-BR');
+                const d = new Date(val);
+                if (!isNaN(d.getTime())) return d.toLocaleDateString('pt-BR');
+            } catch (e) { /* ignore */ }
+            return "Data não disponível";
+        }
+
+        function parseTimestampMs(val) {
+            if (!val) return 0;
+            try {
+                if (typeof val.toDate === 'function') return val.toDate().getTime();
+                const t = new Date(val).getTime();
+                return isNaN(t) ? 0 : t;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        async function resolveTurma(rawTurma) {
+            if (!rawTurma) return { turmaId: '', turmaNome: '' };
+            try {
+                const snap = await getDoc(doc(db, "turmas", rawTurma));
+                if (snap.exists()) {
+                    return { turmaId: snap.id, turmaNome: snap.data().nome || rawTurma };
+                }
+                const qsByName = await getDocs(query(collection(db, "turmas"), where("nome", "==", rawTurma)));
+                if (!qsByName.empty) {
+                    const tDoc = qsByName.docs[0];
+                    return { turmaId: tDoc.id, turmaNome: tDoc.data().nome || rawTurma };
+                }
+            } catch (err) {
+                console.error("Erro ao resolver turma:", err);
+            }
+            return { turmaId: rawTurma, turmaNome: rawTurma };
+        }
+
+        window.targetStudentUid = "";
+        window.targetStudentDocId = "";
+        window.targetTurmaId = "";
+        window.targetTurmaNome = "";
+        window.allAlunoAtividades = [];
+        window.currentAlunoAtividades = [];
+
+        // --- AUTH & CARREGAMENTO DE DADOS ---
         onAuthStateChanged(auth, async (user) => {
             if (!user) { window.location.href = 'portais.html'; return; }
-            
-            // Buscar perfil do utilizador que fez login
-            const q = query(collection(db, "users"), where("email", "==", user.email));
-            const qs = await getDocs(q);
-            if (!qs.empty) {
-                const userData = qs.docs[0].data();
-                
-                if (userData.role !== 'aluno' && userData.role !== 'pais') {
-                    alert("Acesso Negado. Este painel é exclusivo para alunos e responsáveis.");
+
+            try {
+                let userData = null;
+                let userDocId = user.uid;
+
+                const directSnap = await getDoc(doc(db, "users", user.uid));
+                if (directSnap.exists()) {
+                    userData = directSnap.data();
+                    userDocId = directSnap.id;
+                } else {
+                    const qs = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
+                    if (!qs.empty) {
+                        userData = qs.docs[0].data();
+                        userDocId = qs.docs[0].id;
+                    }
+                }
+
+                if (!userData) {
                     window.location.href = 'portais.html';
                     return;
                 }
-                
-                let targetStudentData = null;
 
-                // Se o perfil for Pais, buscar o Aluno vinculado
                 if (userData.role === 'pais') {
-                    document.getElementById('studentName').innerText = userData.name + " (Responsável)";
-                    if (userData.vinculoAlunoId) {
-                        const alunoSnap = await getDoc(doc(db, "users", userData.vinculoAlunoId));
-                        if (alunoSnap.exists()) {
-                            targetStudentData = alunoSnap.data();
-                            targetStudentData.uid = targetStudentData.uid || alunoSnap.id;
-                        } else {
-                            alert("Aluno vinculado não encontrado.");
-                        }
-                    } else {
-                        alert("Não há aluno vinculado a esta conta de responsável.");
-                    }
-                } 
-                // Se o perfil for Aluno, o alvo é o próprio
-                else if (userData.role === 'aluno') {
-                    document.getElementById('studentName').innerText = userData.name;
-                    targetStudentData = userData;
-                    targetStudentData.uid = targetStudentData.uid || qs.docs[0].id;
-                } 
-                // Segurança: Se não for nem aluno nem pais, expulsa
-                else {
+                    window.location.href = 'painel_pais.html';
+                    return;
+                }
+
+                if (userData.role !== 'aluno') {
+                    alert("Acesso Negado. Este painel é exclusivo para alunos.");
                     window.location.href = 'portais.html';
                     return;
                 }
 
-                if (targetStudentData) {
-                    document.getElementById('studentInfoName').innerText = targetStudentData.name;
-                    
-                    if(targetStudentData.turmaId) {
-                        const turmaSnap = await getDoc(doc(db, "turmas", targetStudentData.turmaId));
-                        if(turmaSnap.exists()) {
-                            document.getElementById('turmaInfo').innerText = "Turma: " + turmaSnap.data().nome;
-                        } else {
-                            document.getElementById('turmaInfo').innerText = "Turma: Desconhecida";
-                        }
-                        
-                        
-                        window.targetStudentUid = targetStudentData.uid;
-                        window.targetTurmaId = targetStudentData.turmaId;
+                const studentUid = userData.uid || user.uid || userDocId;
+                const studentName = userData.name || (user.email ? user.email.split('@')[0] : 'Aluno');
 
-                        renderCalendar();
-                        loadHorarios(targetStudentData.turmaId);
-                        loadFaltas(targetStudentData.turmaId, targetStudentData.uid);
-                        loadBoletim(targetStudentData.uid);
-                        loadAtividadesDashboardAndDisciplinas(targetStudentData.turmaId, targetStudentData.uid);
-                    } else {
-                        document.getElementById('turmaInfo').innerText = "Sem turma atribuída";
+                const elStudentName = document.getElementById('studentName');
+                const elStudentInfoName = document.getElementById('studentInfoName');
+                const elTurmaInfo = document.getElementById('turmaInfo');
+
+                if (elStudentName) elStudentName.innerText = studentName;
+                if (elStudentInfoName) elStudentInfoName.innerText = studentName;
+
+                window.targetStudentUid = studentUid;
+                window.targetStudentDocId = userDocId;
+
+                const rawTurma = userData.turmaId || userData.turma || '';
+                const { turmaId, turmaNome } = await resolveTurma(rawTurma);
+                window.targetTurmaId = turmaId;
+                window.targetTurmaNome = turmaNome;
+
+                if (turmaId) {
+                    if (elTurmaInfo) elTurmaInfo.innerText = "Turma: " + (turmaNome || "Desconhecida");
+                    await Promise.all([
+                        loadHorarios(turmaId, turmaNome),
+                        loadFaltas(turmaId, studentUid, userDocId),
+                        loadBoletim(studentUid, userDocId),
+                        loadAtividadesDashboardAndDisciplinas(turmaId, turmaNome, studentUid, userDocId),
+                        loadAvisosAluno(turmaId, turmaNome)
+                    ]);
+                } else {
+                    if (elTurmaInfo) elTurmaInfo.innerText = "Sem turma atribuída";
+                    const noHorMsg = document.getElementById('noHorarioMsg');
+                    if (noHorMsg) {
+                        noHorMsg.innerText = "Você ainda não está vinculado a uma turma.";
+                        noHorMsg.style.display = 'block';
                     }
+                    const df = document.getElementById('dashFaltas');
+                    if (df) df.innerText = "0";
+                    const dc = document.getElementById('dashAtivCasa');
+                    if (dc) dc.innerText = "0/0";
+                    const ds = document.getElementById('dashAtivSala');
+                    if (ds) ds.innerText = "0/0";
+                    await Promise.all([
+                        loadBoletim(studentUid, userDocId),
+                        loadAvisosAluno('', '')
+                    ]);
                 }
-            } else {
-                window.location.href = 'portais.html';
+            } catch (err) {
+                console.error("Erro ao inicializar painel do aluno:", err);
             }
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', (e) => {
-            e.preventDefault(); signOut(auth).then(() => window.location.href = 'portais.html');
-        });
-
-        // LÓGICA DO HORÁRIO
+        // --- LÓGICA DO HORÁRIO ---
         const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
-        const horas = ["08:00 - 08:50", "08:50 - 09:40", "10:00 - 10:50", "10:50 - 11:40", "11:40 - 12:30"];
+        const horasPadrao = ["08:00 - 08:50", "08:50 - 09:40", "10:00 - 10:50", "10:50 - 11:40", "11:40 - 12:30"];
         let horariosData = {};
 
-        function renderCalendar() {
-            document.getElementById('calendarContainer').style.display = 'block';
+        function renderCalendar(extraHoras = []) {
+            const container = document.getElementById('calendarContainer');
             const grid = document.getElementById('alunoCalendarGrid');
-            grid.innerHTML = '<div class="calendar-header">Hora</div>';
-            dias.forEach(d => grid.innerHTML += `<div class="calendar-header">${d}</div>`);
+            if (!container || !grid) return;
 
-            horas.forEach((hora, i) => {
-                grid.innerHTML += `<div class="calendar-time">${hora}</div>`;
+            container.style.display = 'block';
+            const todasHoras = Array.from(new Set([...horasPadrao, ...extraHoras])).sort((a, b) => a.localeCompare(b));
+
+            grid.innerHTML = '<div class="calendar-header">Hora</div>';
+            dias.forEach(d => { grid.innerHTML += `<div class="calendar-header">${esc(d)}</div>`; });
+
+            todasHoras.forEach((hora, i) => {
+                grid.innerHTML += `<div class="calendar-time">${esc(hora)}</div>`;
                 dias.forEach((dia, j) => {
-                    grid.innerHTML += `<div class="calendar-cell" id="cell-${i}-${j}" data-hora="${hora}" data-dia="${dia}"></div>`;
+                    grid.innerHTML += `<div class="calendar-cell readonly" id="cell-${i}-${j}" data-hora="${esc(hora)}" data-dia="${esc(dia)}"></div>`;
                 });
             });
         }
 
-        async function loadHorarios(turmaId) {
-            document.getElementById('noHorarioMsg').style.display = 'none';
+        async function loadHorarios(turmaId, turmaNome) {
+            const noHorarioMsg = document.getElementById('noHorarioMsg');
+            const container = document.getElementById('calendarContainer');
+            if (noHorarioMsg) noHorarioMsg.style.display = 'none';
             horariosData = {};
-            const qs = await getDocs(query(collection(db, "horarios"), where("turmaId", "==", turmaId)));
-            
-            if (qs.empty) {
-                document.getElementById('noHorarioMsg').style.display = 'block';
-            }
-            
-            qs.forEach(docSnap => {
-                const data = docSnap.data();
-                horariosData[`${data.dia}-${data.hora}`] = data;
-            });
-            
-            document.querySelectorAll('.calendar-cell').forEach(cell => {
-                const key = `${cell.getAttribute('data-dia')}-${cell.getAttribute('data-hora')}`;
-                if(horariosData[key]) {
-                    cell.classList.add('filled');
-                    cell.innerHTML = `
-                        <span class="subject">${horariosData[key].disciplina}</span>
-                        <span class="teacher">${horariosData[key].professorName || 'Prof. alocado'}</span>
-                    `;
-                } else {
-                    cell.classList.remove('filled');
-                    cell.innerHTML = '<span class="subject" style="color: #94a3b8;">Livre</span>';
-                }
-            });
-        }
 
-        async function loadFaltas(turmaId, alunoUid) {
             try {
-                const dashFaltas = document.getElementById('dashFaltas');
-                if (!dashFaltas) return;
+                const horarioDocs = new Map();
+                const queries = [query(collection(db, "horarios"), where("turmaId", "==", turmaId))];
+                if (turmaNome && turmaNome !== turmaId) {
+                    queries.push(query(collection(db, "horarios"), where("turmaId", "==", turmaNome)));
+                }
+                queries.push(query(collection(db, "horarios"), where("turma", "==", turmaId)));
 
-                const qs = await getDocs(query(collection(db, "diario"), where("turmaId", "==", turmaId)));
-                let totalFaltas = 0;
-                
-                qs.forEach(docSnap => {
-                    const docData = docSnap.data();
-                    if (docData.chamadas && docData.chamadas[alunoUid] === 'Falta') {
-                        totalFaltas++;
+                for (const qH of queries) {
+                    try {
+                        const qs = await getDocs(qH);
+                        qs.forEach(d => horarioDocs.set(d.id, d.data()));
+                    } catch (e) { /* fallback */ }
+                }
+
+                const extraHoras = [];
+                horarioDocs.forEach(data => {
+                    if (data.hora && !horasPadrao.includes(data.hora)) extraHoras.push(data.hora);
+                    horariosData[`${data.dia}-${data.hora}`] = data;
+                });
+
+                renderCalendar(extraHoras);
+
+                if (horarioDocs.size === 0) {
+                    if (noHorarioMsg) {
+                        noHorarioMsg.innerText = "O horário desta turma ainda não foi definido.";
+                        noHorarioMsg.style.display = 'block';
+                    }
+                    if (container) container.style.display = 'none';
+                    return;
+                }
+
+                document.querySelectorAll('#alunoCalendarGrid .calendar-cell').forEach(cell => {
+                    const key = `${cell.getAttribute('data-dia')}-${cell.getAttribute('data-hora')}`;
+                    if (horariosData[key]) {
+                        cell.classList.add('filled');
+                        cell.innerHTML = `
+                            <span class="subject">${esc(horariosData[key].disciplina)}</span>
+                            <span class="teacher">${esc(horariosData[key].professorName || 'Prof. alocado')}</span>
+                        `;
+                    } else {
+                        cell.classList.remove('filled');
+                        cell.innerHTML = '<span class="subject" style="color: #94a3b8;">Livre</span>';
                     }
                 });
-                
+            } catch (err) {
+                console.error("Erro ao carregar horário:", err);
+                if (noHorarioMsg) {
+                    noHorarioMsg.innerText = "Não foi possível carregar o horário no momento.";
+                    noHorarioMsg.style.display = 'block';
+                }
+            }
+        }
+
+        async function loadFaltas(turmaId, alunoUid, alunoDocId) {
+            const dashFaltas = document.getElementById('dashFaltas');
+            if (!dashFaltas) return;
+            try {
+                const diariosMap = new Map();
+                const queries = [query(collection(db, "diarios"), where("turmaId", "==", turmaId))];
+                queries.push(query(collection(db, "diarios"), where("turma", "==", turmaId)));
+
+                for (const qD of queries) {
+                    try {
+                        const qs = await getDocs(qD);
+                        qs.forEach(d => diariosMap.set(d.id, d.data()));
+                    } catch (e) { /* fallback */ }
+                }
+
+                let totalFaltas = 0;
+                const keysToCheck = Array.from(new Set([alunoUid, alunoDocId].filter(Boolean)));
+
+                diariosMap.forEach(docData => {
+                    const isFalta = keysToCheck.some(k =>
+                        (docData.chamadas && docData.chamadas[k] === 'Falta') ||
+                        (docData.presencas && docData.presencas[k] === 'F')
+                    );
+                    if (isFalta) totalFaltas++;
+                });
+
                 dashFaltas.innerText = totalFaltas;
             } catch (error) {
                 console.error("Erro ao carregar faltas:", error);
-                const dashFaltas = document.getElementById('dashFaltas');
-                if (dashFaltas) dashFaltas.innerText = "Erro";
+                dashFaltas.innerText = "--";
             }
         }
 
-        async function loadBoletim(alunoUid) {
+        async function loadBoletim(alunoUid, alunoDocId) {
+            const tbody = document.getElementById('boletimNotasTable');
+            if (!tbody) return;
             try {
-                const tbody = document.getElementById('boletimNotasTable');
-                if (!tbody) return;
+                const notasMap = new Map();
+                const ids = Array.from(new Set([alunoUid, alunoDocId].filter(Boolean)));
+                for (const id of ids) {
+                    try {
+                        const qs = await getDocs(query(collection(db, "notas"), where("alunoId", "==", id)));
+                        qs.forEach(d => notasMap.set(d.id, d.data()));
+                    } catch (e) { /* ignore */ }
+                }
 
-                const q = query(collection(db, "notas"), where("alunoId", "==", alunoUid));
-                const qs = await getDocs(q);
-
-                if (qs.empty) {
+                if (notasMap.size === 0) {
                     tbody.innerHTML = '<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#64748b;"><i class="fa-solid fa-info-circle"></i> Nenhuma nota lançada até ao momento.</td></tr>';
                     return;
                 }
 
-                tbody.innerHTML = '';
-                
-                let notas = [];
-                qs.forEach(docSnap => notas.push(docSnap.data()));
-                
-                // Ordenar por disciplina e depois por bimestre
-                notas.sort((a, b) => {
-                    if (a.disciplina === b.disciplina) return a.bimestre.localeCompare(b.bimestre);
-                    return a.disciplina.localeCompare(b.disciplina);
+                const notas = Array.from(notasMap.values()).sort((a, b) => {
+                    if ((a.disciplina || '') === (b.disciplina || '')) {
+                        return (a.bimestre || '').localeCompare(b.bimestre || '');
+                    }
+                    return (a.disciplina || '').localeCompare(b.disciplina || '');
                 });
 
-                let totalNotas = 0;
-                let sumNotas = 0;
-
+                tbody.innerHTML = '';
                 notas.forEach(notaData => {
-                    let corNota = notaData.nota >= 7 ? '#10b981' : (notaData.nota >= 5 ? '#f59e0b' : '#ef4444');
+                    const num = parseFloat(notaData.nota);
+                    const corNota = num >= 7 ? '#10b981' : (num >= 5 ? '#f59e0b' : '#ef4444');
                     tbody.innerHTML += `
                         <tr>
-                            <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; color: #334155; font-weight: 600;">${notaData.disciplina}</td>
-                            <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; color: #64748b;">${notaData.bimestre}</td>
-                            <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: bold; color: ${corNota};">${notaData.nota.toFixed(1)}</td>
+                            <td style="font-weight: 600;">${esc(notaData.disciplina)}</td>
+                            <td style="color: #64748b;">${esc(notaData.bimestre)}</td>
+                            <td style="text-align: center; font-weight: bold; color: ${corNota};">${isNaN(num) ? '-' : num.toFixed(1)}</td>
                         </tr>
                     `;
-                    sumNotas += parseFloat(notaData.nota);
-                    totalNotas++;
                 });
-
-                // Atualizar Widget da Média Geral no Dashboard (Removido)
             } catch (error) {
                 console.error("Erro ao carregar boletim:", error);
-                const tbody = document.getElementById('boletimNotasTable');
-                if(tbody) tbody.innerHTML = '<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao carregar o boletim.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao carregar o boletim.</td></tr>';
             }
         }
 
-        async function loadAtividadesDashboardAndDisciplinas(turmaId, alunoUid) {
-            try {
-                const qs = await getDocs(query(collection(db, "atividades"), where("turmaId", "==", turmaId)));
-                let totalCasa = 0;
-                let concCasa = 0;
-                let totalSala = 0;
-                let concSala = 0;
-                
-                let disciplinasSet = new Set();
-                window.alunoAtividades = [];
+        function isActivityDone(ativ, keysToCheck) {
+            const arr = Array.isArray(ativ.alunosConcluidos) ? ativ.alunosConcluidos : [];
+            return keysToCheck.some(k => arr.includes(k));
+        }
 
-                qs.forEach(docSnap => {
-                    const data = docSnap.data();
-                    window.alunoAtividades.push(data);
+        async function loadAtividadesDashboardAndDisciplinas(turmaId, turmaNome, alunoUid, alunoDocId) {
+            try {
+                const ativsMap = new Map();
+                const queries = [
+                    query(collection(db, "atividades"), where("turmaId", "==", turmaId)),
+                    query(collection(db, "atividades"), where("turma", "==", turmaId))
+                ];
+                if (turmaNome && turmaNome !== turmaId) {
+                    queries.push(query(collection(db, "atividades"), where("turma", "==", turmaNome)));
+                }
+
+                for (const qA of queries) {
+                    try {
+                        const qs = await getDocs(qA);
+                        qs.forEach(d => ativsMap.set(d.id, { id: d.id, ...d.data() }));
+                    } catch (e) { /* fallback */ }
+                }
+
+                const allAtivs = Array.from(ativsMap.values()).sort((a, b) => parseTimestampMs(b.dataCriacao) - parseTimestampMs(a.dataCriacao));
+                window.allAlunoAtividades = allAtivs;
+
+                const keysToCheck = Array.from(new Set([alunoUid, alunoDocId].filter(Boolean)));
+                let totalCasa = 0, concCasa = 0, totalSala = 0, concSala = 0;
+                const disciplinasSet = new Set();
+
+                allAtivs.forEach(data => {
                     if (data.disciplina) disciplinasSet.add(data.disciplina);
-                    
-                    let done = (data.alunosConcluidos || []).includes(alunoUid);
+                    const done = isActivityDone(data, keysToCheck);
                     if (data.tipo === 'casa') {
                         totalCasa++;
                         if (done) concCasa++;
@@ -426,63 +665,45 @@
 
                 const selectDisc = document.getElementById('atividadesDisciplinaSelectAluno');
                 if (selectDisc) {
-                    selectDisc.innerHTML = '<option value="">Selecione a Disciplina...</option>';
-                    disciplinasSet.forEach(d => {
-                        selectDisc.innerHTML += `<option value="${d}">${d}</option>`;
-                    });
+                    const sortedDiscs = Array.from(disciplinasSet).sort();
+                    selectDisc.innerHTML = sortedDiscs.length
+                        ? '<option value="">Selecione a Disciplina...</option>' + sortedDiscs.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('')
+                        : '<option value="">Nenhuma atividade atribuída até ao momento</option>';
                 }
             } catch (error) {
                 console.error("Erro ao carregar atividades:", error);
             }
         }
 
-        window.currentAlunoAtividades = [];
-
         const atividadesDisciplinaSelectAluno = document.getElementById('atividadesDisciplinaSelectAluno');
         if (atividadesDisciplinaSelectAluno) {
-            atividadesDisciplinaSelectAluno.addEventListener('change', async (e) => {
+            atividadesDisciplinaSelectAluno.addEventListener('change', (e) => {
                 const disc = e.target.value;
                 const container = document.getElementById('atividadesListaAlunoContainer');
                 const subtabs = document.getElementById('alunoAtividadesSubtabs');
-                
+                if (!container || !subtabs) return;
+
                 if (!disc) {
                     subtabs.style.display = 'none';
                     container.style.display = 'none';
                     return;
                 }
-                
-                subtabs.style.display = 'none';
-                container.style.display = 'block';
-                const tbody = document.getElementById('atividadesListaAluno');
-                tbody.innerHTML = '<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar atividades...</td></tr>';
-                
-                try {
-                    const qAtiv = query(collection(db, "atividades"), where("turmaId", "==", window.targetTurmaId), where("disciplina", "==", disc));
-                    const qsAtiv = await getDocs(qAtiv);
-                    
-                    let ativs = [];
-                    qsAtiv.forEach(docSnap => ativs.push(docSnap.data()));
-                    ativs.sort((a,b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
-                    window.currentAlunoAtividades = ativs;
-                    
-                    container.style.display = 'none';
-                    subtabs.style.display = 'block';
-                    document.querySelectorAll('#alunoAtividadesSubtabs .subtab-link').forEach(b => b.classList.remove('active'));
-                    
-                } catch(error) {
-                    console.error("Erro buscar atividades:", error);
-                    container.style.display = 'block';
-                    subtabs.style.display = 'none';
-                    tbody.innerHTML = '<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#ef4444;">Erro ao carregar atividades.</td></tr>';
-                }
+
+                window.currentAlunoAtividades = (window.allAlunoAtividades || []).filter(a => a.disciplina === disc);
+                subtabs.style.display = 'block';
+
+                const buttons = subtabs.querySelectorAll('.subtab-link');
+                buttons.forEach(b => b.classList.remove('active'));
+                const defaultBtn = subtabs.querySelector('.subtab-link[data-tipo="casa"]');
+                if (defaultBtn) defaultBtn.classList.add('active');
+                renderAlunoAtividades('casa');
             });
         }
-        
+
         document.querySelectorAll('#alunoAtividadesSubtabs .subtab-link').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('#alunoAtividadesSubtabs .subtab-link').forEach(b => b.classList.remove('active'));
                 e.currentTarget.classList.add('active');
-                
                 const tipo = e.currentTarget.getAttribute('data-tipo');
                 renderAlunoAtividades(tipo);
             });
@@ -491,79 +712,144 @@
         function renderAlunoAtividades(tipo) {
             const container = document.getElementById('atividadesListaAlunoContainer');
             const tbody = document.getElementById('atividadesListaAluno');
+            if (!container || !tbody) return;
             container.style.display = 'block';
-            
+
             const filtered = (window.currentAlunoAtividades || []).filter(a => a.tipo === tipo);
-            const alunoUid = window.targetStudentUid;
-            
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#64748b;">Nenhuma atividade de ${tipo} encontrada.</td></tr>`;
+            const keysToCheck = Array.from(new Set([window.targetStudentUid, window.targetStudentDocId].filter(Boolean)));
+
+            if (!filtered.length) {
+                tbody.innerHTML = `<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#64748b;">Nenhuma atividade de ${esc(tipo)} encontrada.</td></tr>`;
                 return;
             }
-            
+
             tbody.innerHTML = '';
             filtered.forEach(data => {
-                let done = (data.alunosConcluidos || []).includes(alunoUid);
-                let statusBadge = done 
-                    ? `<span style="background:#10b981; color:#fff; padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold;">Concluída</span>`
-                    : `<span style="background:#f59e0b; color:#fff; padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold;">Pendente</span>`;
-                    
-                let tipoBadge = data.tipo === 'casa'
+                const done = isActivityDone(data, keysToCheck);
+                const statusBadge = done
+                    ? `<span style="background:#10b981; color:#fff; padding:4px 10px; border-radius:999px; font-size:0.78rem; font-weight:700;">Concluída</span>`
+                    : `<span style="background:#f59e0b; color:#fff; padding:4px 10px; border-radius:999px; font-size:0.78rem; font-weight:700;">Pendente</span>`;
+
+                const tipoBadge = data.tipo === 'casa'
                     ? `<span style="color:#3b82f6; font-weight:600;"><i class="fa-solid fa-house"></i> Casa</span>`
                     : `<span style="color:#8b5cf6; font-weight:600;"><i class="fa-solid fa-school"></i> Sala</span>`;
-                    
-                let descPreview = data.descricao.length > 60 ? data.descricao.substring(0, 60) + '...' : data.descricao;
-                
-                let tr = document.createElement('tr');
-                tr.style.cursor = 'pointer';
-                tr.onmouseover = () => tr.style.backgroundColor = '#f8fafc';
-                tr.onmouseout = () => tr.style.backgroundColor = 'transparent';
-                tr.style.transition = 'background-color 0.2s';
-                
+
+                const descText = data.descricao || '';
+                const descPreview = descText.length > 65 ? descText.substring(0, 65) + '...' : descText;
+
+                const tr = document.createElement('tr');
+                tr.className = 'clickable-row';
                 tr.innerHTML = `
-                    <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; color: #334155;">${descPreview}</td>
-                    <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0;">${tipoBadge}</td>
-                    <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; text-align:center;">${statusBadge}</td>
+                    <td>${esc(descPreview)}</td>
+                    <td>${tipoBadge}</td>
+                    <td style="text-align:center;">${statusBadge}</td>
                 `;
-                
-                tr.onclick = () => abrirModalAtividade(data, tipoBadge, statusBadge);
-                
+                tr.addEventListener('click', () => abrirModalAtividade(data, tipoBadge, statusBadge));
                 tbody.appendChild(tr);
             });
         }
-        
+
         function abrirModalAtividade(data, tipoBadge, statusBadge) {
-            document.getElementById('modalAtividadeDisciplina').innerHTML = data.disciplina;
-            document.getElementById('modalAtividadeTipo').innerHTML = tipoBadge;
-            document.getElementById('modalAtividadeStatus').innerHTML = statusBadge;
-            
-            let dateStr = "Data não disponível";
-            if (data.dataCriacao) {
-                const dateObj = new Date(data.dataCriacao);
-                if (!isNaN(dateObj.getTime())) {
-                    dateStr = dateObj.toLocaleDateString('pt-PT');
-                }
-            }
-            document.getElementById('modalAtividadeData').innerText = dateStr;
-            document.getElementById('modalAtividadeDescricao').innerText = data.descricao;
-            
+            const elDisc = document.getElementById('modalAtividadeDisciplina');
+            const elTipo = document.getElementById('modalAtividadeTipo');
+            const elStatus = document.getElementById('modalAtividadeStatus');
+            const elData = document.getElementById('modalAtividadeData');
+            const elDesc = document.getElementById('modalAtividadeDescricao');
             const modal = document.getElementById('atividadeModalAluno');
-            if(modal) modal.classList.add('active');
+
+            if (elDisc) elDisc.innerText = data.disciplina || 'Atividade';
+            if (elTipo) elTipo.innerHTML = tipoBadge;
+            if (elStatus) elStatus.innerHTML = statusBadge;
+            if (elData) elData.innerText = formatDateValue(data.dataCriacao);
+            if (elDesc) elDesc.innerText = data.descricao || '';
+            if (modal) modal.classList.add('active');
         }
-        
-        window.fecharModalAtividade = function() {
-            const modal = document.getElementById('atividadeModalAluno');
-            if(modal) modal.classList.remove('active');
-        };
-        
-        const modalAtividadeAluno = document.getElementById('atividadeModalAluno');
-        if (modalAtividadeAluno) {
-            modalAtividadeAluno.addEventListener('click', (e) => {
-                if (e.target === modalAtividadeAluno) {
-                    window.fecharModalAtividade();
+
+        // --- MURAL DE AVISOS (LEITURA) ---
+        async function loadAvisosAluno(turmaId, turmaNome) {
+            const container = document.getElementById('muralAvisosAluno');
+            if (!container) return;
+
+            try {
+                container.innerHTML = '<p style="color: #64748b;">A carregar avisos...</p>';
+                const avisosMap = new Map();
+
+                const targets = ['todas'];
+                if (turmaId) targets.push(turmaId);
+                if (turmaNome && turmaNome !== turmaId) targets.push(turmaNome);
+
+                for (const target of targets) {
+                    try {
+                        const qs = await getDocs(query(collection(db, "avisos"), where("turma", "==", target)));
+                        qs.forEach(d => avisosMap.set(d.id, { id: d.id, ...d.data() }));
+                    } catch (e) { /* fallback */ }
                 }
-            });
+
+                const avisosList = Array.from(avisosMap.values()).sort(
+                    (a, b) => parseTimestampMs(b.dataCriacao) - parseTimestampMs(a.dataCriacao)
+                );
+
+                if (!avisosList.length) {
+                    container.innerHTML = '<p style="color: #64748b;">Nenhum aviso publicado até ao momento.</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                avisosList.forEach(aviso => {
+                    const isImp = aviso.prioridade === 'importante';
+                    const card = document.createElement('div');
+                    card.className = `aviso-card${isImp ? ' importante' : ''}`;
+
+                    const badgeHtml = isImp
+                        ? '<span class="badge badge-importante"><i class="fa-solid fa-triangle-exclamation"></i> Importante</span>'
+                        : '<span class="badge badge-normal">Comunicado</span>';
+                    const targetLabel = aviso.turma === 'todas' ? 'Toda a Escola' : (turmaNome || 'Minha Turma');
+                    const msgText = aviso.mensagem || '';
+                    const excerpt = msgText.length > 130 ? msgText.substring(0, 130) + '...' : msgText;
+
+                    card.innerHTML = `
+                        <div class="aviso-card-top">
+                            <h4 class="aviso-card-title">${esc(aviso.titulo || 'Aviso')}</h4>
+                            ${badgeHtml}
+                        </div>
+                        <p class="aviso-card-excerpt">${esc(excerpt)}</p>
+                        <div class="aviso-card-meta">
+                            <span><i class="fa-solid fa-user-tie"></i> ${esc(aviso.autorNome || 'Colégio Veras')}</span>
+                            <span><i class="fa-solid fa-users"></i> ${esc(targetLabel)}</span>
+                            <span style="margin-left: auto;"><i class="fa-regular fa-calendar"></i> ${esc(formatDateValue(aviso.dataCriacao))}</span>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => abrirModalAviso(aviso, targetLabel));
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                console.error("Erro ao carregar avisos:", err);
+                container.innerHTML = '<p style="color: #ef4444;">Não foi possível carregar os avisos.</p>';
+            }
+        }
+
+        function abrirModalAviso(aviso, targetLabel) {
+            const elTitulo = document.getElementById('modalAvisoTitulo');
+            const elPrio = document.getElementById('modalAvisoPrioridade');
+            const elTarget = document.getElementById('modalAvisoTarget');
+            const elAutor = document.getElementById('modalAvisoAutor');
+            const elData = document.getElementById('modalAvisoData');
+            const elMsg = document.getElementById('modalAvisoMensagem');
+            const modal = document.getElementById('avisoModalAluno');
+
+            if (elTitulo) elTitulo.innerText = aviso.titulo || 'Comunicado';
+            if (elPrio) {
+                elPrio.innerHTML = aviso.prioridade === 'importante'
+                    ? '<span class="badge badge-importante"><i class="fa-solid fa-triangle-exclamation"></i> Importante</span>'
+                    : '<span class="badge badge-normal">Normal</span>';
+            }
+            if (elTarget) elTarget.innerText = targetLabel || 'Geral';
+            if (elAutor) elAutor.innerText = aviso.autorNome ? `Por ${aviso.autorNome}` : '';
+            if (elData) elData.innerText = formatDateValue(aviso.dataCriacao);
+            if (elMsg) elMsg.innerText = aviso.mensagem || '';
+            if (modal) modal.classList.add('active');
         }
     </script>
 </body>
+
 </html>

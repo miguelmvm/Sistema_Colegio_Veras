@@ -153,9 +153,7 @@
                         window.location.href = 'painel_aluno.html';
                         return;
                     } else if (currentProfile === 'pais' && userData.role === 'pais') {
-                        alert("Acesso restrito. Perfil 'Pais' em desenvolvimento.");
-                        submitBtn.innerText = "Entrar";
-                        submitBtn.disabled = false;
+                        window.location.href = 'painel_pais.html';
                         return;
                     } else {
                         alert("O perfil escolhido na interface não corresponde ao seu cargo real.");

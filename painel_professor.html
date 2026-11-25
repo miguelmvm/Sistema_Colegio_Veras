@@ -10,18 +10,21 @@
 </head>
 
 <body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo-container"
-                style="display: flex; align-items: center; gap: 12px; margin-bottom: 3rem; text-decoration: none;">
-                <i class="fa-solid fa-graduation-cap" style="font-size: 1.5rem; color: #fff;"></i>
-                <span
-                    style="color: #fff; font-size: 1.4rem; font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.5px;">COLÉGIO
-                    VERAS</span>
+        <aside class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo-brand">
+                    <i class="fa-solid fa-graduation-cap" style="font-size: 1.5rem; color: #fff;"></i>
+                    <span>COLÉGIO VERAS</span>
+                </div>
+                <button type="button" class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Fechar menu">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-            <ul class="sidebar-menu"
-                style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+            <ul class="sidebar-menu">
                 <li><a href="#" class="tab-link active" data-tab="tab-dashboard"><i class="fa-solid fa-chart-pie"></i>
                         Dashboard</a></li>
                 <li><a href="#" class="tab-link" data-tab="tab-horario"><i class="fa-solid fa-calendar-days"></i> O Meu
@@ -30,8 +33,11 @@
                         Classe</a></li>
                 <li><a href="#" class="tab-link" data-tab="tab-notas"><i class="fa-solid fa-star"></i> Caderneta de
                         Notas</a></li>
-                <li><a href="#" class="tab-link" data-tab="tab-atividades"><i class="fa-solid fa-clipboard-check"></i> Atividades</a></li>
-                <li style="margin-top: auto;"><a href="#" id="logoutBtn" class="tab-link"
+                <li><a href="#" class="tab-link" data-tab="tab-atividades"><i class="fa-solid fa-clipboard-check"></i>
+                        Atividades</a></li>
+                <li><a href="#" class="tab-link" data-tab="tab-avisos"><i class="fa-solid fa-bullhorn"></i>
+                        Mural de Avisos</a></li>
+                <li style="margin-top: auto;"><a href="#" id="logoutBtn"
                         style="color: #fca5a5; background: rgba(239, 68, 68, 0.1);"><i
                             class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</a></li>
             </ul>
@@ -39,13 +45,14 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="header"
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem;">
-                <h2
-                    style="font-family: 'Outfit', sans-serif; font-size: 2.2rem; color: #0f172a; margin: 0; font-weight: 700; letter-spacing: -0.5px;">
-                    Portal do Docente</h2>
-                <div class="user-info"
-                    style="display: flex; align-items: center; gap: 1rem; background: #fff; padding: 0.5rem 1.5rem; border-radius: 999px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">
+            <header class="header">
+                <div class="header-left">
+                    <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h2>Portal do Docente</h2>
+                </div>
+                <div class="user-info">
                     <span id="profName">A carregar...</span>
                     <i class="fa-solid fa-circle-user" style="font-size: 2rem; color: var(--primary-color);"></i>
                 </div>
@@ -55,36 +62,26 @@
 
             <!-- Dashboard -->
             <div id="tab-dashboard" class="tab-content active">
-                <div
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
-                    <div
-                        style="background: #fff; padding: 1.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border-left: 4px solid var(--primary-color); display: flex; align-items: center; gap: 1.5rem;">
-                        <div
-                            style="width: 60px; height: 60px; border-radius: 12px; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
-                            <i class="fa-solid fa-chalkboard-user"></i>
-                        </div>
-                        <div>
-                            <h4
-                                style="margin: 0 0 0.25rem 0; font-size: 0.85rem; color: #64748b; font-family: 'Inter', sans-serif; font-weight: 600; text-transform: uppercase;">
-                                As Minhas Turmas</h4>
-                            <p id="dashTotalTurmas"
-                                style="margin: 0; font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; color: #0f172a; line-height: 1;">
-                                0</p>
+                <div class="dash-grid">
+                    <div class="dash-widget blue">
+                        <div class="dash-icon blue"><i class="fa-solid fa-chalkboard-user"></i></div>
+                        <div class="dash-info">
+                            <h4>As Minhas Turmas</h4>
+                            <p id="dashTotalTurmas">0</p>
                         </div>
                     </div>
-                    <div
-                        style="background: #fff; padding: 1.5rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border-left: 4px solid #10b981; display: flex; align-items: center; gap: 1.5rem;">
-                        <div
-                            style="width: 60px; height: 60px; border-radius: 12px; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
-                            <i class="fa-solid fa-stopwatch"></i>
+                    <div class="dash-widget green">
+                        <div class="dash-icon green"><i class="fa-solid fa-stopwatch"></i></div>
+                        <div class="dash-info">
+                            <h4>Tempos Letivos</h4>
+                            <p id="dashTotalAulas">0</p>
                         </div>
-                        <div>
-                            <h4
-                                style="margin: 0 0 0.25rem 0; font-size: 0.85rem; color: #64748b; font-family: 'Inter', sans-serif; font-weight: 600; text-transform: uppercase;">
-                                Tempos Letivos</h4>
-                            <p id="dashTotalAulas"
-                                style="margin: 0; font-size: 2rem; font-weight: 800; font-family: 'Outfit', sans-serif; color: #0f172a; line-height: 1;">
-                                0</p>
+                    </div>
+                    <div class="dash-widget gold">
+                        <div class="dash-icon gold"><i class="fa-solid fa-clipboard-check"></i></div>
+                        <div class="dash-info">
+                            <h4>Atividades Criadas</h4>
+                            <p id="dashTotalAtividades">0</p>
                         </div>
                     </div>
                 </div>
@@ -92,15 +89,11 @@
 
             <!-- Horário -->
             <div id="tab-horario" class="tab-content">
-                <div
-                    style="background: #fff; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
-                    <h3
-                        style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; color: #0f172a; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-calendar-days" style="color: var(--primary-color);"></i> O Meu Horário
-                        Semanal
-                    </h3>
-                    <p style="margin-bottom: 2rem; color: #64748b;">Aulas consolidadas de todas as turmas que lecionas.
-                    </p>
+                <div class="panel-card">
+                    <h3><i class="fa-solid fa-calendar-days" style="color: var(--primary-color);"></i> O Meu Horário
+                        Semanal</h3>
+                    <p style="margin-bottom: 1.5rem; color: #64748b;">Aulas consolidadas de todas as turmas que
+                        leciona.</p>
 
                     <div class="calendar-scroll">
                         <div class="calendar-grid" id="profCalendarGrid"></div>
@@ -110,70 +103,51 @@
 
             <!-- Diário de Classe -->
             <div id="tab-diario" class="tab-content">
-                <div
-                    style="background: #fff; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
-                    <h3
-                        style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; color: #0f172a; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-book-open" style="color: var(--primary-color);"></i> Diário de Classe
-                    </h3>
+                <div class="panel-card">
+                    <h3><i class="fa-solid fa-book-open" style="color: var(--primary-color);"></i> Diário de Classe</h3>
 
-                    <div style="max-width: 300px; margin-bottom: 2rem;">
-                        <label
-                            style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; font-size: 0.95rem;">Selecione
-                            a Turma:</label>
-                        <select id="diarioTurmaSelect"
-                            style="width: 100%; padding: 0.85rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 1rem; outline: none; background: #f8fafc;">
-                            <option value="">A carregar as tuas turmas...</option>
+                    <div class="form-group" style="max-width: 340px; margin-bottom: 1.5rem;">
+                        <label>Selecione a Turma:</label>
+                        <select id="diarioTurmaSelect">
+                            <option value="">A carregar as suas turmas...</option>
                         </select>
                     </div>
                     <div id="diarioContainer" style="display: none;">
-                        <h4 style="margin-bottom: 1rem; color: #1e293b; font-family: 'Outfit', sans-serif;">Registo de
-                            Faltas e Sumários</h4>
+                        <h4 style="margin-bottom: 1rem; color: #1e293b;">Registo de Faltas e Sumários</h4>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                            <div>
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; font-size: 0.85rem;">Data
-                                    da Aula:</label>
-                                <input type="date" id="diarioData"
-                                    style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 0.95rem; outline: none;">
+                        <div class="form-grid-2" style="margin-bottom: 1rem;">
+                            <div class="form-group">
+                                <label>Data da Aula:</label>
+                                <input type="date" id="diarioData">
                             </div>
-                            <div>
-                                <label
-                                    style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; font-size: 0.85rem;">Disciplina:</label>
-                                <select id="diarioDisciplina"
-                                    style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 0.95rem; outline: none; background: #f8fafc;">
+                            <div class="form-group">
+                                <label>Disciplina:</label>
+                                <select id="diarioDisciplina">
                                     <option value="">A carregar disciplinas...</option>
                                 </select>
                             </div>
                         </div>
 
-                        <textarea id="diarioSumario" class="diario-textarea"
-                            placeholder="Escreve aqui o sumário da aula (matéria lecionada, observações)..."></textarea>
+                        <div class="form-group">
+                            <label>Sumário da Aula:</label>
+                            <textarea id="diarioSumario" class="diario-textarea"
+                                placeholder="Escreva aqui o sumário da aula (matéria lecionada, observações)..."></textarea>
+                        </div>
 
-                        <div
-                            style="margin-top: 1.5rem; border-radius: 12px; border: 1px solid var(--admin-border); overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; background: #fff;">
+                        <div class="table-responsive" style="margin-top: 1.25rem;">
+                            <table>
                                 <thead>
                                     <tr>
-                                        <th
-                                            style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: left;">
-                                            Aluno</th>
-                                        <th
-                                            style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: center; width: 150px;">
-                                            Presença</th>
+                                        <th>Aluno</th>
+                                        <th style="text-align: center; width: 160px;">Presença</th>
                                     </tr>
                                 </thead>
-                                <tbody id="diarioAlunosList">
-                                </tbody>
+                                <tbody id="diarioAlunosList"></tbody>
                             </table>
                         </div>
 
-                        <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
-                            <button id="btnSalvarDiario" type="button"
-                                style="background: var(--primary-color); color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                                onmouseover="this.style.transform='scale(1.05)'"
-                                onmouseout="this.style.transform='scale(1)'">Guardar Diário</button>
+                        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                            <button id="btnSalvarDiario" type="button" class="btn-primary">Guardar Diário</button>
                         </div>
                     </div>
                 </div>
@@ -181,36 +155,25 @@
 
             <!-- Caderneta de Notas -->
             <div id="tab-notas" class="tab-content">
-                <div
-                    style="background: #fff; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
-                    <h3
-                        style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; color: #0f172a; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-star" style="color: var(--primary-color);"></i> Caderneta de Notas
-                    </h3>
+                <div class="panel-card">
+                    <h3><i class="fa-solid fa-star" style="color: var(--primary-color);"></i> Caderneta de Notas</h3>
 
-                    <div
-                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                        <div>
-                            <label
-                                style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; font-size: 0.95rem;">Turma:</label>
-                            <select id="notasTurmaSelect"
-                                style="width: 100%; padding: 0.85rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 1rem; outline: none; background: #f8fafc;">
-                                <option value="">A carregar as tuas turmas...</option>
+                    <div class="form-grid-auto" style="margin-bottom: 1.5rem;">
+                        <div class="form-group">
+                            <label>Turma:</label>
+                            <select id="notasTurmaSelect">
+                                <option value="">A carregar as suas turmas...</option>
                             </select>
                         </div>
-                        <div>
-                            <label
-                                style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; font-size: 0.95rem;">Disciplina:</label>
-                            <select id="notasDisciplina"
-                                style="width: 100%; padding: 0.85rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 1rem; outline: none; background: #f8fafc;">
+                        <div class="form-group">
+                            <label>Disciplina:</label>
+                            <select id="notasDisciplina">
                                 <option value="">A carregar disciplinas...</option>
                             </select>
                         </div>
-                        <div>
-                            <label
-                                style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; font-size: 0.95rem;">Bimestre/Período:</label>
-                            <select id="notasBimestre"
-                                style="width: 100%; padding: 0.85rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 1rem; outline: none; background: #f8fafc;">
+                        <div class="form-group">
+                            <label>Bimestre/Período:</label>
+                            <select id="notasBimestre">
                                 <option value="1º Bimestre">1º Bimestre</option>
                                 <option value="2º Bimestre">2º Bimestre</option>
                                 <option value="3º Bimestre">3º Bimestre</option>
@@ -220,30 +183,21 @@
                     </div>
 
                     <div id="notasContainer" style="display: none;">
-                        <h4 style="margin-bottom: 1rem; color: #1e293b; font-family: 'Outfit', sans-serif;">Lançamento
-                            de Notas</h4>
-                        <div style="border-radius: 12px; border: 1px solid var(--admin-border); overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; background: #fff;">
+                        <h4 style="margin-bottom: 1rem; color: #1e293b;">Lançamento de Notas</h4>
+                        <div class="table-responsive">
+                            <table>
                                 <thead>
                                     <tr>
-                                        <th
-                                            style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: left;">
-                                            Aluno</th>
-                                        <th
-                                            style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: center; width: 200px;">
-                                            Nota (0 a 10)</th>
+                                        <th>Aluno</th>
+                                        <th style="text-align: center; width: 180px;">Nota (0 a 10)</th>
                                     </tr>
                                 </thead>
-                                <tbody id="notasAlunosList">
-                                </tbody>
+                                <tbody id="notasAlunosList"></tbody>
                             </table>
                         </div>
 
-                        <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
-                            <button id="btnSalvarNotas" type="button"
-                                style="background: var(--primary-color); color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                                onmouseover="this.style.transform='scale(1.05)'"
-                                onmouseout="this.style.transform='scale(1)'">Guardar Notas</button>
+                        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                            <button id="btnSalvarNotas" type="button" class="btn-primary">Guardar Notas</button>
                         </div>
                     </div>
                 </div>
@@ -251,57 +205,123 @@
 
             <!-- Tab Atividades -->
             <div id="tab-atividades" class="tab-content">
-                <div style="background: #fff; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; margin-bottom: 2rem;">
-                    <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; color: #0f172a; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-clipboard-check" style="color: var(--primary-color);"></i> Criar Nova Atividade
-                    </h3>
-                    
-                    <form id="formCriarAtividade" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
-                        <div>
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; font-size: 0.95rem;">Turma:</label>
-                            <select id="ativTurmaSelect" required style="width: 100%; padding: 0.85rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 1rem; outline: none; background: #f8fafc;">
+                <div class="panel-card">
+                    <h3><i class="fa-solid fa-clipboard-check" style="color: var(--primary-color);"></i> Criar Nova
+                        Atividade</h3>
+
+                    <form id="formCriarAtividade" class="form-grid-auto">
+                        <div class="form-group">
+                            <label>Turma:</label>
+                            <select id="ativTurmaSelect" required>
                                 <option value="">A carregar turmas...</option>
                             </select>
                         </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; font-size: 0.95rem;">Disciplina:</label>
-                            <select id="ativDisciplinaSelect" required style="width: 100%; padding: 0.85rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 1rem; outline: none; background: #f8fafc;">
+                        <div class="form-group">
+                            <label>Disciplina:</label>
+                            <select id="ativDisciplinaSelect" required>
                                 <option value="">A carregar disciplinas...</option>
                             </select>
                         </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; font-size: 0.95rem;">Tipo:</label>
-                            <select id="ativTipoSelect" required style="width: 100%; padding: 0.85rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 1rem; outline: none; background: #f8fafc;">
+                        <div class="form-group">
+                            <label>Tipo:</label>
+                            <select id="ativTipoSelect" required>
                                 <option value="casa">Atividade de Casa</option>
                                 <option value="sala">Atividade de Sala</option>
                             </select>
                         </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; font-size: 0.95rem;">Descrição da Atividade:</label>
-                            <textarea id="ativDescricao" required style="width: 100%; min-height: 100px; padding: 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 1rem; outline: none; background: #f8fafc; resize: vertical;" placeholder="Descreva a atividade aqui..."></textarea>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Descrição da Atividade:</label>
+                            <textarea id="ativDescricao" required class="diario-textarea" style="min-height: 100px;"
+                                placeholder="Descreva a atividade aqui..."></textarea>
                         </div>
                         <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
-                            <button type="submit" id="btnSalvarNovaAtividade" style="background: var(--primary-color); color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Criar Atividade</button>
+                            <button type="submit" id="btnSalvarNovaAtividade" class="btn-primary">Criar
+                                Atividade</button>
                         </div>
                     </form>
                 </div>
 
-                <div style="background: #fff; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
-                    <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; color: #0f172a; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-list-check" style="color: var(--primary-color);"></i> Atividades Criadas
+                <div class="panel-card">
+                    <h3><i class="fa-solid fa-list-check" style="color: var(--primary-color);"></i> Atividades Criadas
                     </h3>
-                    <div style="border-radius: 12px; border: 1px solid var(--admin-border); overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; background: #fff;">
+                    <div class="table-responsive">
+                        <table>
                             <thead>
                                 <tr>
-                                    <th style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: left;">Descrição</th>
-                                    <th style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: left;">Turma / Disciplina</th>
-                                    <th style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: left;">Tipo</th>
-                                    <th style="background: #f1f5f9; color: #475569; font-weight: 700; padding: 1.25rem 1rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #e2e8f0; text-align: center;">Ações</th>
+                                    <th>Descrição</th>
+                                    <th>Turma / Disciplina</th>
+                                    <th>Tipo</th>
+                                    <th style="text-align: center;">Concluídas</th>
+                                    <th style="text-align: center;">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="listaAtividadesProf">
-                                <tr><td colspan="4" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar atividades...</td></tr>
+                                <tr>
+                                    <td colspan="5" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar
+                                        atividades...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Mural de Avisos -->
+            <div id="tab-avisos" class="tab-content">
+                <div class="panel-card">
+                    <h3><i class="fa-solid fa-bullhorn" style="color: var(--primary-color);"></i> Enviar Aviso às Minhas
+                        Turmas</h3>
+                    <form id="formCriarAvisoProf" class="form-grid-auto">
+                        <div class="form-group">
+                            <label>Título do Aviso:</label>
+                            <input type="text" id="profAvisoTitulo" required
+                                placeholder="Ex: Entrega do Trabalho de Ciências">
+                        </div>
+                        <div class="form-group">
+                            <label>Turma Destinatária:</label>
+                            <select id="profAvisoTurmaSelect" required>
+                                <option value="">A carregar as suas turmas...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Prioridade:</label>
+                            <select id="profAvisoPrioridade" required>
+                                <option value="normal">Normal</option>
+                                <option value="importante">Importante</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Mensagem:</label>
+                            <textarea id="profAvisoMensagem" required class="diario-textarea" style="min-height: 110px;"
+                                placeholder="Escreva o comunicado para os alunos e responsáveis desta turma..."></textarea>
+                        </div>
+                        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
+                            <button type="submit" id="btnPublicarAvisoProf" class="btn-primary">
+                                <i class="fa-solid fa-paper-plane"></i> Publicar Aviso
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="panel-card">
+                    <h3><i class="fa-solid fa-rectangle-list" style="color: var(--primary-color);"></i> Meus Avisos
+                        Publicados</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Turma</th>
+                                    <th>Prioridade</th>
+                                    <th>Data</th>
+                                    <th style="text-align: center;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaAvisosProf">
+                                <tr>
+                                    <td colspan="5" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar
+                                        avisos...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -310,586 +330,807 @@
         </main>
     </div>
 
-    <!-- Modal Gerir Atividades -->
-    <div id="modalAtividades" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-        <div style="background: #fff; width: 90%; max-width: 500px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
-            <div style="padding: 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; color: #0f172a; margin: 0;">Gerir Conclusões</h3>
-                <button type="button" onclick="document.getElementById('modalAtividades').style.display='none'" style="background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">&times;</button>
+    <!-- Modal Gerir Conclusões -->
+    <div class="modal-overlay" id="modalAtividades">
+        <div class="modal-content" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3 style="font-size: 1.25rem; margin: 0;"><i class="fa-solid fa-users-gear"></i> Gerir Conclusões</h3>
+                <button type="button" class="modal-close" id="closeModalAtividades" aria-label="Fechar">&times;</button>
             </div>
-            <div style="padding: 1.5rem; overflow-y: auto; flex: 1;">
-                <p style="margin-top: 0; color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem;">Marque os alunos que completaram esta atividade:</p>
-                <div id="modalAtividadesListaAlunos" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div>
+                <p style="margin-top: 0; color: #64748b; font-size: 0.95rem; margin-bottom: 1rem;">Marque os alunos que
+                    completaram esta atividade:</p>
+                <div id="modalAtividadesListaAlunos" class="checklist-box" style="max-height: 320px;">
                     <!-- Checkboxes injected here -->
                 </div>
             </div>
-            <div style="padding: 1.5rem; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: flex-end;">
-                <button type="button" id="btnSalvarConclusoes" style="background: var(--primary-color); color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Salvar</button>
+            <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" id="cancelarModalAtividades" class="btn"
+                    style="background: #e2e8f0; color: #475569; padding: 0.75rem 1.25rem; border-radius: 10px; border: none; font-weight: 600;">Fechar</button>
+                <button type="button" id="btnSalvarConclusoes" class="btn-primary">Salvar</button>
             </div>
         </div>
     </div>
 
     <!-- Modal Editar Atividade -->
-    <div id="modalEditarAtividade" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-        <div style="background: #fff; width: 90%; max-width: 500px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; display: flex; flex-direction: column;">
-            <div style="padding: 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; color: #0f172a; margin: 0;"><i class="fa-solid fa-pen"></i> Editar Atividade</h3>
-                <button type="button" onclick="document.getElementById('modalEditarAtividade').style.display='none'" style="background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">&times;</button>
+    <div class="modal-overlay" id="modalEditarAtividade">
+        <div class="modal-content" style="max-width: 540px;">
+            <div class="modal-header">
+                <h3 style="font-size: 1.25rem; margin: 0;"><i class="fa-solid fa-pen"></i> Editar Atividade</h3>
+                <button type="button" class="modal-close" id="closeModalEditarAtividade"
+                    aria-label="Fechar">&times;</button>
             </div>
-            <div style="padding: 1.5rem;">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #475569; font-size: 0.95rem;">Nova Descrição:</label>
-                <textarea id="editarAtividadeDescricao" style="width: 100%; min-height: 150px; padding: 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 1rem; outline: none; background: #f8fafc; resize: vertical;"></textarea>
+            <form id="formEditarAtividade">
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Turma:</label>
+                        <select id="editarAtividadeTurma" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Disciplina:</label>
+                        <select id="editarAtividadeDisciplina" required></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tipo:</label>
+                    <select id="editarAtividadeTipo" required>
+                        <option value="casa">Atividade de Casa</option>
+                        <option value="sala">Atividade de Sala</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Descrição da Atividade:</label>
+                    <textarea id="editarAtividadeDescricao" class="diario-textarea" style="min-height: 130px;"
+                        required></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
+                    <button type="button" id="cancelarEdicaoAtividade" class="btn"
+                        style="background: #e2e8f0; color: #475569; padding: 0.75rem 1.25rem; border-radius: 10px; border: none; font-weight: 600;">Cancelar</button>
+                    <button type="submit" id="btnSalvarEdicaoAtividade" class="btn-primary">Guardar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Detalhe Aviso -->
+    <div class="modal-overlay" id="modalDetalheAvisoProf">
+        <div class="modal-content" style="max-width: 560px;">
+            <div class="modal-header">
+                <h3 id="mdlAvisoProfTitulo" style="font-size: 1.3rem; margin: 0;">Comunicado</h3>
+                <button type="button" class="modal-close" id="closeModalAvisoProf" aria-label="Fechar">&times;</button>
             </div>
-            <div style="padding: 1.5rem; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="document.getElementById('modalEditarAtividade').style.display='none'" style="background: #e2e8f0; color: #475569; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#cbd5e1'" onmouseout="this.style.background='#e2e8f0'">Cancelar</button>
-                <button type="button" id="btnSalvarEdicaoAtividade" style="background: var(--primary-color); color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Salvar</button>
+            <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
+                <span id="mdlAvisoProfBadge"></span>
+                <span id="mdlAvisoProfTurma" class="chip"></span>
+                <span id="mdlAvisoProfData" style="font-size: 0.85rem; color: #64748b; margin-left: auto;"></span>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem;">
+                <p id="mdlAvisoProfMensagem" style="white-space: pre-wrap; color: #334155; line-height: 1.6; margin: 0;">
+                </p>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                <button type="button" id="fecharModalAvisoProfBtn" class="btn"
+                    style="background: #e2e8f0; color: #475569; padding: 0.75rem 1.5rem; border-radius: 10px; border: none; font-weight: 600;">Fechar</button>
             </div>
         </div>
     </div>
 
     <!-- Toast Notification -->
     <div id="toastNotification"
-        style="position: fixed; bottom: 2rem; right: 2rem; background: #10b981; color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; align-items: center; gap: 10px; z-index: 100; font-weight: 600; font-family: 'Inter', sans-serif;">
+        style="position: fixed; bottom: 2rem; right: 2rem; background: #10b981; color: white; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: none; align-items: center; gap: 10px; z-index: 1200; font-weight: 600; font-family: 'Inter', sans-serif;">
         <i class="fa-solid fa-circle-check"></i>
-        <span id="toastMsg">Diário salvo com sucesso!</span>
+        <span id="toastMsg">Operação concluída com sucesso!</span>
     </div>
 
     <script type="module">
         import { auth, db } from './js/firebase-config.js';
+        import { esc, parseDisciplinas } from './js/auth-utils.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
         import { collection, query, where, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
         let currentProfUid = "";
+        let currentAuthUid = "";
         let currentProfName = "";
         let currentUserData = null;
-        const turmasCache = {}; // id -> nome
-        const minhasTurmas = new Set(); // store turmaIds
-        const minhasDisciplinas = new Set(); // store discplinas
+        const turmasCache = {};
+        const minhasTurmas = new Set();
+        const minhasDisciplinas = new Set();
+        let disciplinasDisponiveis = [];
+        let atividadesCache = [];
+        let avisosProfCache = [];
+        let modalAtividadeAtualId = null;
+        let atividadeEditandoId = null;
 
-        // Tab Navigation
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            const msgEl = document.getElementById('toastMsg');
+            if (!toast || !msgEl) return;
+            msgEl.innerText = msg;
+            toast.style.display = 'flex';
+            clearTimeout(window.__profToastTimer);
+            window.__profToastTimer = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3200);
+        }
+
+        function formatDateValue(val) {
+            if (!val) return "--";
+            try {
+                if (typeof val.toDate === 'function') return val.toDate().toLocaleDateString('pt-BR');
+                const d = new Date(val);
+                if (!isNaN(d.getTime())) return d.toLocaleDateString('pt-BR');
+            } catch (e) { /* ignore */ }
+            return "--";
+        }
+
+        function parseTimestampMs(val) {
+            if (!val) return 0;
+            try {
+                if (typeof val.toDate === 'function') return val.toDate().getTime();
+                const t = new Date(val).getTime();
+                return isNaN(t) ? 0 : t;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        // --- MOBILE SIDEBAR ---
+        const sidebarEl = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+
+        function setSidebarOpen(open) {
+            if (!sidebarEl || !sidebarBackdrop) return;
+            sidebarEl.classList.toggle('open', open);
+            sidebarBackdrop.classList.toggle('active', open);
+        }
+
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', () => setSidebarOpen(true));
+        if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', () => setSidebarOpen(false));
+        if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => setSidebarOpen(false));
+
+        // --- TAB NAVIGATION ---
         document.querySelectorAll('.tab-link').forEach(link => {
-            if (link.id === 'logoutBtn') return;
             link.addEventListener('click', (e) => {
                 e.preventDefault();
+                const targetId = e.currentTarget.getAttribute('data-tab');
+                if (!targetId) return;
+                const targetEl = document.getElementById(targetId);
+                if (!targetEl) return;
+
                 document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 e.currentTarget.classList.add('active');
-                document.getElementById(e.currentTarget.getAttribute('data-tab')).classList.add('active');
+                targetEl.classList.add('active');
+                setSidebarOpen(false);
             });
         });
 
-        // Auth & RBAC Isolamento
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) { window.location.href = 'portais.html'; return; }
+        // --- MODAL CLOSING HELPERS ---
+        function closeAllProfModals() {
+            ['modalAtividades', 'modalEditarAtividade', 'modalDetalheAvisoProf'].forEach(id => {
+                const m = document.getElementById(id);
+                if (m) m.classList.remove('active');
+            });
+        }
 
-            const qs = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
+        function bindModalDismiss(modalId, closeBtnIds) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.remove('active');
+            });
+            closeBtnIds.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) btn.addEventListener('click', () => modal.classList.remove('active'));
+            });
+        }
 
-            if (qs.empty || qs.docs[0].data().role !== 'professor') {
-                window.location.href = 'portais.html';
-                return;
+        bindModalDismiss('modalAtividades', ['closeModalAtividades', 'cancelarModalAtividades']);
+        bindModalDismiss('modalEditarAtividade', ['closeModalEditarAtividade', 'cancelarEdicaoAtividade']);
+        bindModalDismiss('modalDetalheAvisoProf', ['closeModalAvisoProf', 'fecharModalAvisoProfBtn']);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAllProfModals();
+                setSidebarOpen(false);
             }
-
-            const userData = qs.docs[0].data();
-            currentUserData = userData;
-            currentProfName = userData.name;
-            currentProfUid = qs.docs[0].data().uid;
-            document.getElementById('profName').innerText = "Prof. " + currentProfName.split(" ")[0]; // Primeiro nome
-
-            await initDocenteData();
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', (e) => {
-            e.preventDefault(); signOut(auth).then(() => window.location.href = 'portais.html');
+        // --- LOGOUT ---
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                signOut(auth).then(() => window.location.href = 'portais.html');
+            });
+        }
+
+        // --- SET DEFAULT DATE ON DIÁRIO ---
+        const diarioDataInput = document.getElementById('diarioData');
+        if (diarioDataInput && !diarioDataInput.value) {
+            const d = new Date();
+            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+            diarioDataInput.value = d.toISOString().slice(0, 10);
+        }
+
+        // --- AUTH & RBAC ISOLAMENTO ---
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = 'portais.html'; return; }
+            try {
+                let userData = null;
+                const directSnap = await getDoc(doc(db, "users", user.uid));
+                if (directSnap.exists()) {
+                    userData = directSnap.data();
+                } else {
+                    const qs = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
+                    if (!qs.empty) userData = qs.docs[0].data();
+                }
+
+                if (!userData || userData.role !== 'professor') {
+                    window.location.href = 'portais.html';
+                    return;
+                }
+
+                currentUserData = userData;
+                currentAuthUid = user.uid;
+                currentProfUid = userData.uid || user.uid;
+                currentProfName = userData.name || (user.email ? user.email.split('@')[0] : 'Docente');
+
+                const profNameEl = document.getElementById('profName');
+                if (profNameEl) profNameEl.innerText = "Prof. " + currentProfName.split(" ")[0];
+
+                await initDocenteData();
+            } catch (error) {
+                console.error("Erro ao autenticar docente:", error);
+            }
         });
 
         const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
         const horas = ["08:00 - 08:50", "08:50 - 09:40", "10:00 - 10:50", "10:50 - 11:40", "11:40 - 12:30"];
         let horariosData = {};
 
-        function renderCalendar() {
+        function renderCalendar(extraHoras = []) {
             const grid = document.getElementById('profCalendarGrid');
+            if (!grid) return;
+            const todasHoras = Array.from(new Set([...horas, ...extraHoras]));
             grid.innerHTML = '<div class="calendar-header">Hora</div>';
-            dias.forEach(d => grid.innerHTML += `<div class="calendar-header">${d}</div>`);
+            dias.forEach(d => { grid.innerHTML += `<div class="calendar-header">${esc(d)}</div>`; });
 
-            horas.forEach((hora, i) => {
-                grid.innerHTML += `<div class="calendar-time">${hora}</div>`;
+            todasHoras.forEach((hora, i) => {
+                grid.innerHTML += `<div class="calendar-time">${esc(hora)}</div>`;
                 dias.forEach((dia, j) => {
-                    grid.innerHTML += `<div class="calendar-cell readonly" id="cell-${i}-${j}" data-hora="${hora}" data-dia="${dia}"></div>`;
+                    grid.innerHTML += `<div class="calendar-cell readonly" id="cell-${i}-${j}" data-hora="${esc(hora)}" data-dia="${esc(dia)}"></div>`;
                 });
             });
         }
 
         async function getTurmaName(turmaId) {
+            if (!turmaId) return "Turma Desconhecida";
             if (turmasCache[turmaId]) return turmasCache[turmaId];
-            const tDoc = await getDoc(doc(db, "turmas", turmaId));
-            if (tDoc.exists()) {
-                turmasCache[turmaId] = tDoc.data().nome;
-                return tDoc.data().nome;
+            try {
+                const tDoc = await getDoc(doc(db, "turmas", turmaId));
+                if (tDoc.exists()) {
+                    turmasCache[turmaId] = tDoc.data().nome || turmaId;
+                    return turmasCache[turmaId];
+                }
+            } catch (e) {
+                console.error("Erro ao buscar turma:", turmaId, e);
             }
             return "Turma Desconhecida";
         }
 
+        async function fetchAlunosByTurma(turmaId) {
+            if (!turmaId) return [];
+            const alunosMap = new Map();
+            try {
+                const qs1 = await getDocs(query(collection(db, "users"), where("role", "==", "aluno"), where("turmaId", "==", turmaId)));
+                qs1.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const uid = data.uid || docSnap.id;
+                    alunosMap.set(uid, { docId: docSnap.id, uid, ...data });
+                });
+            } catch (e) { console.error("Erro fetchAlunos turmaId:", e); }
+
+            try {
+                const qs2 = await getDocs(query(collection(db, "users"), where("role", "==", "aluno"), where("turma", "==", turmaId)));
+                qs2.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const uid = data.uid || docSnap.id;
+                    if (!alunosMap.has(uid)) alunosMap.set(uid, { docId: docSnap.id, uid, ...data });
+                });
+            } catch (e) { console.error("Erro fetchAlunos turma:", e); }
+
+            return Array.from(alunosMap.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        }
+
         async function initDocenteData() {
-            renderCalendar();
-
-            // ISOLAMENTO RBAC: Busca estritamente os horários onde este professor leciona
-            const qs = await getDocs(query(collection(db, "horarios"), where("professorId", "==", currentProfUid)));
-            let aulasCount = 0;
-
-            for (let docSnap of qs.docs) {
-                aulasCount++;
-                const data = docSnap.data();
-                minhasTurmas.add(data.turmaId);
-                if (data.disciplina) minhasDisciplinas.add(data.disciplina);
-                const turmaName = await getTurmaName(data.turmaId);
-                data.turmaName = turmaName;
-                horariosData[`${data.dia}-${data.hora}`] = data;
-            }
-
-            // Renderiza aulas na grelha
-            document.querySelectorAll('.calendar-cell').forEach(cell => {
-                const key = `${cell.getAttribute('data-dia')}-${cell.getAttribute('data-hora')}`;
-                if (horariosData[key]) {
-                    cell.classList.add('filled');
-                    cell.innerHTML = `
-                        <span class="subject">${horariosData[key].disciplina}</span>
-                        <span class="class-name">${horariosData[key].turmaName}</span>
-                    `;
-                }
-            });
-
-            // Popula métricas do Dashboard
-            document.getElementById('dashTotalTurmas').innerText = minhasTurmas.size;
-            document.getElementById('dashTotalAulas').innerText = aulasCount;
-
-            // Preenche seleção de turmas no Diário e Notas
-            const diarioSelect = document.getElementById('diarioTurmaSelect');
-            const notasSelect = document.getElementById('notasTurmaSelect');
-            const ativTurmaSelect = document.getElementById('ativTurmaSelect');
-            if(diarioSelect) diarioSelect.innerHTML = '<option value="">Selecione uma turma...</option>';
-            if(notasSelect) notasSelect.innerHTML = '<option value="">Selecione uma turma...</option>';
-            if(ativTurmaSelect) ativTurmaSelect.innerHTML = '<option value="">Selecione uma turma...</option>';
-            
-            for (let tId of minhasTurmas) {
-                const tName = await getTurmaName(tId);
-                if(diarioSelect) diarioSelect.innerHTML += `<option value="${tId}">${tName}</option>`;
-                if(notasSelect) notasSelect.innerHTML += `<option value="${tId}">${tName}</option>`;
-                if(ativTurmaSelect) ativTurmaSelect.innerHTML += `<option value="${tId}">${tName}</option>`;
-            }
-
-            // Popula selects de Disciplina
-            const diarioDiscSelect = document.getElementById('diarioDisciplina');
-            const notasDiscSelect = document.getElementById('notasDisciplina');
-            const ativDiscSelect = document.getElementById('ativDisciplinaSelect');
-            
-            if(diarioDiscSelect) diarioDiscSelect.innerHTML = '<option value="">Selecione uma disciplina...</option>';
-            if(notasDiscSelect) notasDiscSelect.innerHTML = '<option value="">Selecione uma disciplina...</option>';
-            if(ativDiscSelect) ativDiscSelect.innerHTML = '<option value="">Selecione uma disciplina...</option>';
-
-            let disciplinasDisponiveis = [];
-            if (currentUserData && Array.isArray(currentUserData.disciplinas) && currentUserData.disciplinas.length > 0) {
-                disciplinasDisponiveis = currentUserData.disciplinas;
-            } else {
-                disciplinasDisponiveis = Array.from(minhasDisciplinas).sort();
-            }
-
-            for (let disc of disciplinasDisponiveis) {
-                if(diarioDiscSelect) diarioDiscSelect.innerHTML += `<option value="${disc}">${disc}</option>`;
-                if(notasDiscSelect) notasDiscSelect.innerHTML += `<option value="${disc}">${disc}</option>`;
-                if(ativDiscSelect) ativDiscSelect.innerHTML += `<option value="${disc}">${disc}</option>`;
-            }
-            
-            loadAtividadesCriadas();
-        }
-
-        // --- LOGICA DO DIÁRIO ---
-        document.getElementById('diarioTurmaSelect').addEventListener('change', async (e) => {
-            const turmaId = e.target.value;
-            const container = document.getElementById('diarioContainer');
-            const tbody = document.getElementById('diarioAlunosList');
-
-            if (!turmaId) {
-                container.style.display = 'none';
-                return;
-            }
-            container.style.display = 'block';
-            tbody.innerHTML = '<tr><td colspan="2" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar alunos da turma...</td></tr>';
-
-            // Apenas busca os alunos pertencentes à turma selecionada (onde o prof dá aulas)
-            const qA = query(collection(db, "users"), where("role", "==", "aluno"), where("turmaId", "==", turmaId));
-            const qsA = await getDocs(qA);
-
-            if (qsA.empty) {
-                tbody.innerHTML = '<tr><td colspan="2" style="padding:1.5rem; text-align:center; color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Sem alunos registados nesta turma.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = '';
-            qsA.forEach(docSnap => {
-                const aluno = docSnap.data();
-                tbody.innerHTML += `
-                    <tr data-uid="${aluno.uid}">
-                        <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; color: #334155; vertical-align: middle;">
-                            <strong>${aluno.name}</strong> <br>
-                            <span style="font-size:0.85rem; color:#64748b;">Matrícula: ${aluno.matricula}</span>
-                        </td>
-                        <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; text-align: center; vertical-align: middle;">
-                            <div class="presence-toggle">
-                                <button type="button" class="p on" onclick="togglePresenca(this)">P</button>
-                                <button type="button" class="f" onclick="togglePresenca(this)">F</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-        });
-
-        // Função global auxiliar para os botões de presença
-        window.togglePresenca = function (btn) {
-            const container = btn.closest('.presence-toggle');
-            container.querySelectorAll('button').forEach(b => b.classList.remove('on'));
-            btn.classList.add('on');
-        }
-
-        // Lógica de Salvar Diário
-        document.getElementById('btnSalvarDiario').addEventListener('click', async () => {
-            const btn = document.getElementById('btnSalvarDiario');
-            const turmaId = document.getElementById('diarioTurmaSelect').value;
-            const dataAula = document.getElementById('diarioData').value;
-            const disciplina = document.getElementById('diarioDisciplina').value.trim();
-            const sumario = document.getElementById('diarioSumario').value.trim();
-
-            if (!turmaId || !dataAula || !disciplina || !sumario) {
-                alert("Por favor, preencha todos os campos: Data, Disciplina e Sumário da aula.");
-                return;
-            }
-
-            btn.innerText = "A guardar...";
-            btn.disabled = true;
-            btn.style.opacity = '0.7';
-
-            const chamadas = {};
-            document.querySelectorAll('#diarioAlunosList tr[data-uid]').forEach(tr => {
-                const uid = tr.getAttribute('data-uid');
-                const isPresent = tr.querySelector('.presence-toggle button.p').classList.contains('on');
-                chamadas[uid] = isPresent ? 'Presente' : 'Falta';
-            });
-
             try {
-                await addDoc(collection(db, "diario"), {
-                    professorId: currentProfUid,
-                    turmaId: turmaId,
-                    disciplina: disciplina,
-                    data: dataAula,
-                    sumario: sumario,
-                    chamadas: chamadas,
-                    createdAt: new Date().toISOString()
-                });
+                horariosData = {};
+                minhasTurmas.clear();
+                minhasDisciplinas.clear();
 
-                // Show toast UI
-                const toast = document.getElementById('toastNotification');
-                toast.style.display = 'flex';
-                setTimeout(() => { toast.style.display = 'none'; }, 3000);
+                const uidsToCheck = Array.from(new Set([currentProfUid, currentAuthUid].filter(Boolean)));
+                const horarioDocs = new Map();
 
-                // Clear Form & Reload list
-                document.getElementById('diarioData').value = "";
-                document.getElementById('diarioDisciplina').value = "";
-                document.getElementById('diarioSumario').value = "";
-                document.getElementById('diarioTurmaSelect').dispatchEvent(new Event('change'));
+                for (const uid of uidsToCheck) {
+                    const qs = await getDocs(query(collection(db, "horarios"), where("professorId", "==", uid)));
+                    qs.forEach(d => horarioDocs.set(d.id, d.data()));
+                }
 
-            } catch (error) {
-                console.error("Erro ao guardar diário: ", error);
-                alert("Erro ao guardar o diário. Verifique as permissões ou a conexão.");
-            } finally {
-                btn.innerText = "Guardar Diário";
-                btn.disabled = false;
-                btn.style.opacity = '1';
-            }
-        });
+                let aulasCount = 0;
+                const extraHoras = [];
 
-        // --- LOGICA DAS NOTAS ---
-        async function loadAlunosAndNotas() {
-            const turmaId = document.getElementById('notasTurmaSelect').value;
-            const disciplina = document.getElementById('notasDisciplina').value;
-            const bimestre = document.getElementById('notasBimestre').value;
-            const container = document.getElementById('notasContainer');
-            const tbody = document.getElementById('notasAlunosList');
+                for (const data of horarioDocs.values()) {
+                    aulasCount++;
+                    const tId = data.turmaId || data.turma;
+                    if (tId) minhasTurmas.add(tId);
+                    if (data.disciplina) minhasDisciplinas.add(data.disciplina);
+                    if (data.hora && !horas.includes(data.hora)) extraHoras.push(data.hora);
+                    const turmaName = await getTurmaName(tId);
+                    data.turmaName = turmaName;
+                    horariosData[`${data.dia}-${data.hora}`] = data;
+                }
 
-            if (!turmaId) {
-                container.style.display = 'none';
-                return;
-            }
-            container.style.display = 'block';
-            tbody.innerHTML = '<tr><td colspan="2" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar alunos da turma...</td></tr>';
+                renderCalendar(extraHoras);
 
-            const qA = query(collection(db, "users"), where("role", "==", "aluno"), where("turmaId", "==", turmaId));
-            const qsA = await getDocs(qA);
-
-            if (qsA.empty) {
-                tbody.innerHTML = '<tr><td colspan="2" style="padding:1.5rem; text-align:center; color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Sem alunos registados nesta turma.</td></tr>';
-                return;
-            }
-
-            // Buscar notas já existentes
-            let notasMap = {};
-            let docsMap = {}; // store doc ids
-            if (disciplina && bimestre) {
-                const qN = query(collection(db, "notas"), where("turmaId", "==", turmaId));
-                const qsN = await getDocs(qN);
-                qsN.forEach(d => {
-                    const data = d.data();
-                    if (data.disciplina === disciplina && data.bimestre === bimestre) {
-                        notasMap[data.alunoId] = data.nota;
-                        docsMap[data.alunoId] = d.id;
+                document.querySelectorAll('#profCalendarGrid .calendar-cell').forEach(cell => {
+                    const key = `${cell.getAttribute('data-dia')}-${cell.getAttribute('data-hora')}`;
+                    if (horariosData[key]) {
+                        cell.classList.add('filled');
+                        cell.innerHTML = `
+                            <span class="subject">${esc(horariosData[key].disciplina)}</span>
+                            <span class="class-name">${esc(horariosData[key].turmaName)}</span>
+                        `;
+                    } else {
+                        cell.classList.remove('filled');
+                        cell.innerHTML = '<span class="subject" style="color: #94a3b8;">Livre</span>';
                     }
                 });
-            }
 
-            tbody.innerHTML = '';
-            qsA.forEach(docSnap => {
-                const aluno = docSnap.data();
-                const notaAtual = notasMap[aluno.uid] !== undefined ? notasMap[aluno.uid] : '';
-                const docIdAtual = docsMap[aluno.uid] || '';
-                tbody.innerHTML += `
-                    <tr data-uid="${aluno.uid}" data-docid="${docIdAtual}">
-                        <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; color: #334155; vertical-align: middle;">
-                            <strong>${aluno.name}</strong> <br>
-                            <span style="font-size:0.85rem; color:#64748b;">Matrícula: ${aluno.matricula}</span>
-                        </td>
-                        <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; text-align: center; vertical-align: middle;">
-                            <input type="number" class="nota-input" min="0" max="10" step="0.1" placeholder="Ex: 8.5" value="${notaAtual}" style="width: 100px; padding: 0.5rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 8px; font-weight: bold; outline: none;">
-                        </td>
-                    </tr>
-                `;
-            });
+                const dashTurmas = document.getElementById('dashTotalTurmas');
+                const dashAulas = document.getElementById('dashTotalAulas');
+                if (dashTurmas) dashTurmas.innerText = minhasTurmas.size;
+                if (dashAulas) dashAulas.innerText = aulasCount;
+
+                // Popula seletores de turmas (somente turmas onde o professor está alocado)
+                const turmaSelectIds = [
+                    'diarioTurmaSelect',
+                    'notasTurmaSelect',
+                    'ativTurmaSelect',
+                    'profAvisoTurmaSelect',
+                    'editarAtividadeTurma'
+                ];
+                turmaSelectIds.forEach(id => {
+                    const sel = document.getElementById(id);
+                    if (sel) sel.innerHTML = minhasTurmas.size
+                        ? '<option value="">Selecione uma turma...</option>'
+                        : '<option value="">Sem turmas alocadas no horário</option>';
+                });
+
+                for (const tId of minhasTurmas) {
+                    const tName = await getTurmaName(tId);
+                    const optHtml = `<option value="${esc(tId)}">${esc(tName)}</option>`;
+                    turmaSelectIds.forEach(id => {
+                        const sel = document.getElementById(id);
+                        if (sel) sel.innerHTML += optHtml;
+                    });
+                }
+
+                // Popula selects de Disciplina
+                const parsedDiscs = parseDisciplinas(currentUserData?.disciplinas);
+                disciplinasDisponiveis = parsedDiscs.length > 0
+                    ? [...parsedDiscs]
+                    : Array.from(minhasDisciplinas).sort();
+
+                const discSelectIds = [
+                    'diarioDisciplina',
+                    'notasDisciplina',
+                    'ativDisciplinaSelect',
+                    'editarAtividadeDisciplina'
+                ];
+                discSelectIds.forEach(id => {
+                    const sel = document.getElementById(id);
+                    if (!sel) return;
+                    sel.innerHTML = '<option value="">Selecione uma disciplina...</option>';
+                    disciplinasDisponiveis.forEach(disc => {
+                        sel.innerHTML += `<option value="${esc(disc)}">${esc(disc)}</option>`;
+                    });
+                });
+
+                await Promise.all([loadAtividadesCriadas(), loadAvisosProfessor()]);
+            } catch (err) {
+                console.error("Erro em initDocenteData:", err);
+            }
         }
 
-        document.getElementById('notasTurmaSelect').addEventListener('change', loadAlunosAndNotas);
-        document.getElementById('notasDisciplina').addEventListener('change', loadAlunosAndNotas);
-        document.getElementById('notasBimestre').addEventListener('change', loadAlunosAndNotas);
+        // --- LÓGICA DO DIÁRIO ---
+        const diarioTurmaSelect = document.getElementById('diarioTurmaSelect');
+        if (diarioTurmaSelect) {
+            diarioTurmaSelect.addEventListener('change', async (e) => {
+                const turmaId = e.target.value;
+                const container = document.getElementById('diarioContainer');
+                const tbody = document.getElementById('diarioAlunosList');
+                if (!container || !tbody) return;
 
-        document.getElementById('btnSalvarNotas').addEventListener('click', async () => {
-            const btn = document.getElementById('btnSalvarNotas');
-            const turmaId = document.getElementById('notasTurmaSelect').value;
-            const disciplina = document.getElementById('notasDisciplina').value;
-            const bimestre = document.getElementById('notasBimestre').value;
-
-            if (!turmaId || !disciplina || !bimestre) {
-                alert("Por favor, preencha todos os campos: Turma, Disciplina e Bimestre.");
-                return;
-            }
-
-            btn.innerText = "A guardar...";
-            btn.disabled = true;
-            btn.style.opacity = '0.7';
-
-            try {
-                const trs = document.querySelectorAll('#notasAlunosList tr[data-uid]');
-                let notasSalvas = 0;
-                for (let tr of trs) {
-                    const alunoId = tr.getAttribute('data-uid');
-                    let existingDocId = tr.getAttribute('data-docid');
-                    const notaInput = tr.querySelector('.nota-input');
-                    const notaValor = notaInput.value.trim();
-                    if (notaValor !== "") {
-                        if (existingDocId) {
-                            await updateDoc(doc(db, "notas", existingDocId), {
-                                nota: parseFloat(notaValor),
-                                updatedAt: new Date().toISOString()
-                            });
-                        } else {
-                            const newDoc = await addDoc(collection(db, "notas"), {
-                                alunoId: alunoId,
-                                turmaId: turmaId,
-                                disciplina: disciplina,
-                                bimestre: bimestre,
-                                nota: parseFloat(notaValor),
-                                professorId: currentProfUid,
-                                createdAt: new Date().toISOString()
-                            });
-                            tr.setAttribute('data-docid', newDoc.id);
-                        }
-                        notasSalvas++;
-                        // Removida a limpeza do input (notaInput.value = "")
-                    }
-                }
-
-                if (notasSalvas > 0) {
-                    const toast = document.getElementById('toastNotification');
-                    const msgEl = document.getElementById('toastMsg');
-                    const originalMsg = msgEl.innerText;
-                    msgEl.innerText = `${notasSalvas} nota(s) guardada(s) com sucesso!`;
-                    toast.style.display = 'flex';
-                    setTimeout(() => {
-                        toast.style.display = 'none';
-                        msgEl.innerText = originalMsg; // revert
-                    }, 3000);
-                } else {
-                    alert("Nenhuma nota foi preenchida para salvar.");
-                }
-
-            } catch (error) {
-                console.error("Erro ao guardar notas: ", error);
-                alert("Erro ao guardar as notas. Verifique as permissões ou a conexão.");
-            } finally {
-                btn.innerText = "Guardar Notas";
-                btn.disabled = false;
-                btn.style.opacity = '1';
-            }
-        });
-
-        // --- LÓGICA DE ATIVIDADES ---
-        let atividadesCache = [];
-        let modalAtividadeAtualId = null;
-
-        async function loadAtividadesCriadas() {
-            const tbody = document.getElementById('listaAtividadesProf');
-            if(!tbody) return;
-            
-            try {
-                tbody.innerHTML = '<tr><td colspan="4" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar atividades...</td></tr>';
-                const q = query(collection(db, "atividades"), where("professorId", "==", currentProfUid));
-                const qs = await getDocs(q);
-                
-                if (qs.empty) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="padding:1.5rem; text-align:center; color:#64748b;">Sem atividades criadas.</td></tr>';
+                if (!turmaId) {
+                    container.style.display = 'none';
                     return;
                 }
-                
-                atividadesCache = qs.docs.map(d => ({id: d.id, ...d.data()}));
-                // sort by date desc
-                atividadesCache.sort((a,b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
-                
-                tbody.innerHTML = '';
-                for(let ativ of atividadesCache) {
-                    try {
-                        const tName = turmasCache[ativ.turmaId] || await getTurmaName(ativ.turmaId);
-                        
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; color: #334155;">
-                                ${ativ.descricao || 'Sem descrição'}
-                                <div style="font-size:0.8rem; color:#94a3b8; margin-top:0.25rem;">${ativ.dataCriacao ? new Date(ativ.dataCriacao).toLocaleDateString() : '--'}</div>
-                            </td>
-                            <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; color: #334155;">
-                                <strong>${tName}</strong><br>
-                                <span style="font-size:0.85rem; color:#64748b;">${ativ.disciplina || '--'}</span>
-                            </td>
-                            <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0;">
-                                <span style="background: ${ativ.tipo === 'casa' ? '#e0e7ff' : '#dcfce7'}; color: ${ativ.tipo === 'casa' ? '#4f46e5' : '#16a34a'}; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">
-                                    ${ativ.tipo === 'casa' ? 'Casa' : 'Sala'}
-                                </span>
-                            </td>
-                            <td style="padding: 1.25rem 1rem; border-bottom: 1px solid #e2e8f0; text-align: center;">
-                                <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                                    <button type="button" onclick="window.abrirModalAtividade('${ativ.id}')" style="background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; padding: 0.5rem; border-radius: 6px; cursor: pointer; transition: all 0.2s;" title="Gerir Conclusões" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
-                                        <i class="fa-solid fa-users"></i>
-                                    </button>
-                                    <button type="button" onclick="window.editarAtividade('${ativ.id}')" style="background: #fffbeb; color: #d97706; border: 1px solid #fde68a; padding: 0.5rem; border-radius: 6px; cursor: pointer; transition: all 0.2s;" title="Editar Atividade" onmouseover="this.style.background='#fef3c7'" onmouseout="this.style.background='#fffbeb'">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </button>
-                                    <button type="button" onclick="window.excluirAtividade('${ativ.id}')" style="background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; padding: 0.5rem; border-radius: 6px; cursor: pointer; transition: all 0.2s;" title="Excluir Atividade" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    } catch(rowError) {
-                        console.error("Erro ao renderizar atividade:", ativ.id, rowError);
+                container.style.display = 'block';
+                tbody.innerHTML = '<tr><td colspan="2" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar alunos da turma...</td></tr>';
+
+                try {
+                    const alunos = await fetchAlunosByTurma(turmaId);
+                    if (!alunos.length) {
+                        tbody.innerHTML = '<tr><td colspan="2" style="padding:1.5rem; text-align:center; color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Sem alunos registados nesta turma.</td></tr>';
+                        return;
                     }
+
+                    tbody.innerHTML = '';
+                    alunos.forEach(aluno => {
+                        tbody.innerHTML += `
+                            <tr data-uid="${esc(aluno.uid)}">
+                                <td>
+                                    <strong>${esc(aluno.name)}</strong><br>
+                                    <span style="font-size:0.85rem; color:#64748b;">Matrícula: ${esc(aluno.matricula || 'N/A')}</span>
+                                </td>
+                                <td style="text-align: center;">
+                                    <div class="presence-toggle">
+                                        <button type="button" class="p on" onclick="togglePresenca(this)">P</button>
+                                        <button type="button" class="f" onclick="togglePresenca(this)">F</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } catch (err) {
+                    console.error("Erro ao carregar alunos do diário:", err);
+                    tbody.innerHTML = '<tr><td colspan="2" style="padding:1.5rem; text-align:center; color:#ef4444;">Erro ao carregar alunos.</td></tr>';
+                }
+            });
+        }
+
+        window.togglePresenca = function (btn) {
+            if (!btn) return;
+            const container = btn.closest('.presence-toggle');
+            if (!container) return;
+            container.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+            btn.classList.add('on');
+        };
+
+        const btnSalvarDiario = document.getElementById('btnSalvarDiario');
+        if (btnSalvarDiario) {
+            btnSalvarDiario.addEventListener('click', async () => {
+                const turmaId = document.getElementById('diarioTurmaSelect')?.value;
+                const dataAula = document.getElementById('diarioData')?.value;
+                const disciplina = document.getElementById('diarioDisciplina')?.value.trim();
+                const sumario = document.getElementById('diarioSumario')?.value.trim();
+
+                if (!turmaId || !dataAula || !disciplina || !sumario) {
+                    alert("Por favor, preencha todos os campos: Turma, Data, Disciplina e Sumário da aula.");
+                    return;
+                }
+
+                btnSalvarDiario.innerText = "A guardar...";
+                btnSalvarDiario.disabled = true;
+
+                const chamadas = {};
+                const presencas = {};
+                document.querySelectorAll('#diarioAlunosList tr[data-uid]').forEach(tr => {
+                    const uid = tr.getAttribute('data-uid');
+                    const pBtn = tr.querySelector('.presence-toggle button.p');
+                    const isPresent = pBtn ? pBtn.classList.contains('on') : true;
+                    chamadas[uid] = isPresent ? 'Presente' : 'Falta';
+                    presencas[uid] = isPresent ? 'P' : 'F';
+                });
+
+                try {
+                    const turmaNome = await getTurmaName(turmaId);
+                    await addDoc(collection(db, "diarios"), {
+                        professorId: currentAuthUid || currentProfUid,
+                        professorName: currentProfName,
+                        turmaId: turmaId,
+                        turma: turmaId,
+                        turmaNome: turmaNome,
+                        disciplina: disciplina,
+                        data: dataAula,
+                        sumario: sumario,
+                        conteudo: sumario,
+                        chamadas: chamadas,
+                        presencas: presencas,
+                        totalAlunos: Object.keys(chamadas).length,
+                        totalPresentes: Object.values(chamadas).filter(v => v === 'Presente').length,
+                        createdAt: new Date().toISOString()
+                    });
+
+                    showToast("Diário salvo com sucesso!");
+                    const sumEl = document.getElementById('diarioSumario');
+                    if (sumEl) sumEl.value = "";
+                    const discEl = document.getElementById('diarioDisciplina');
+                    if (discEl) discEl.value = "";
+                    document.getElementById('diarioTurmaSelect')?.dispatchEvent(new Event('change'));
+                } catch (error) {
+                    console.error("Erro ao guardar diário:", error);
+                    alert("Erro ao guardar o diário. Verifique as permissões ou a conexão.");
+                } finally {
+                    btnSalvarDiario.innerText = "Guardar Diário";
+                    btnSalvarDiario.disabled = false;
+                }
+            });
+        }
+
+        // --- LÓGICA DAS NOTAS ---
+        async function loadAlunosAndNotas() {
+            const turmaId = document.getElementById('notasTurmaSelect')?.value;
+            const disciplina = document.getElementById('notasDisciplina')?.value;
+            const bimestre = document.getElementById('notasBimestre')?.value;
+            const container = document.getElementById('notasContainer');
+            const tbody = document.getElementById('notasAlunosList');
+            if (!container || !tbody) return;
+
+            if (!turmaId) {
+                container.style.display = 'none';
+                return;
+            }
+            container.style.display = 'block';
+            tbody.innerHTML = '<tr><td colspan="2" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar alunos da turma...</td></tr>';
+
+            try {
+                const alunos = await fetchAlunosByTurma(turmaId);
+                if (!alunos.length) {
+                    tbody.innerHTML = '<tr><td colspan="2" style="padding:1.5rem; text-align:center; color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Sem alunos registados nesta turma.</td></tr>';
+                    return;
+                }
+
+                const notasMap = {};
+                const docsMap = {};
+                if (disciplina && bimestre) {
+                    const qsN = await getDocs(query(collection(db, "notas"), where("turmaId", "==", turmaId)));
+                    qsN.forEach(d => {
+                        const data = d.data();
+                        if (data.disciplina === disciplina && data.bimestre === bimestre) {
+                            notasMap[data.alunoId] = data.nota;
+                            docsMap[data.alunoId] = d.id;
+                        }
+                    });
+                }
+
+                tbody.innerHTML = '';
+                alunos.forEach(aluno => {
+                    const notaAtual = notasMap[aluno.uid] !== undefined ? notasMap[aluno.uid] : '';
+                    const docIdAtual = docsMap[aluno.uid] || '';
+                    tbody.innerHTML += `
+                        <tr data-uid="${esc(aluno.uid)}" data-docid="${esc(docIdAtual)}">
+                            <td>
+                                <strong>${esc(aluno.name)}</strong><br>
+                                <span style="font-size:0.85rem; color:#64748b;">Matrícula: ${esc(aluno.matricula || 'N/A')}</span>
+                            </td>
+                            <td style="text-align: center;">
+                                <input type="number" class="nota-input" min="0" max="10" step="0.1" placeholder="Ex: 8.5" value="${esc(notaAtual)}"
+                                    style="width: 100px; padding: 0.5rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 8px; font-weight: bold; outline: none;">
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error("Erro ao carregar notas:", error);
+                tbody.innerHTML = '<tr><td colspan="2" style="padding:1.5rem; text-align:center; color:#ef4444;">Erro ao carregar alunos/notas.</td></tr>';
+            }
+        }
+
+        document.getElementById('notasTurmaSelect')?.addEventListener('change', loadAlunosAndNotas);
+        document.getElementById('notasDisciplina')?.addEventListener('change', loadAlunosAndNotas);
+        document.getElementById('notasBimestre')?.addEventListener('change', loadAlunosAndNotas);
+
+        const btnSalvarNotas = document.getElementById('btnSalvarNotas');
+        if (btnSalvarNotas) {
+            btnSalvarNotas.addEventListener('click', async () => {
+                const turmaId = document.getElementById('notasTurmaSelect')?.value;
+                const disciplina = document.getElementById('notasDisciplina')?.value;
+                const bimestre = document.getElementById('notasBimestre')?.value;
+
+                if (!turmaId || !disciplina || !bimestre) {
+                    alert("Por favor, preencha todos os campos: Turma, Disciplina e Bimestre.");
+                    return;
+                }
+
+                btnSalvarNotas.innerText = "A guardar...";
+                btnSalvarNotas.disabled = true;
+
+                try {
+                    const trs = document.querySelectorAll('#notasAlunosList tr[data-uid]');
+                    let notasSalvas = 0;
+                    for (const tr of trs) {
+                        const alunoId = tr.getAttribute('data-uid');
+                        const existingDocId = tr.getAttribute('data-docid');
+                        const notaInput = tr.querySelector('.nota-input');
+                        const notaValor = notaInput ? notaInput.value.trim() : '';
+                        if (notaValor !== "") {
+                            const numericNota = parseFloat(notaValor);
+                            if (isNaN(numericNota) || numericNota < 0 || numericNota > 10) continue;
+                            if (existingDocId) {
+                                await updateDoc(doc(db, "notas", existingDocId), {
+                                    nota: numericNota,
+                                    updatedAt: new Date().toISOString()
+                                });
+                            } else {
+                                const newDoc = await addDoc(collection(db, "notas"), {
+                                    alunoId: alunoId,
+                                    turmaId: turmaId,
+                                    disciplina: disciplina,
+                                    bimestre: bimestre,
+                                    nota: numericNota,
+                                    professorId: currentAuthUid || currentProfUid,
+                                    createdAt: new Date().toISOString()
+                                });
+                                tr.setAttribute('data-docid', newDoc.id);
+                            }
+                            notasSalvas++;
+                        }
+                    }
+
+                    if (notasSalvas > 0) {
+                        showToast(`${notasSalvas} nota(s) guardada(s) com sucesso!`);
+                    } else {
+                        alert("Nenhuma nota válida (0 a 10) foi preenchida para salvar.");
+                    }
+                } catch (error) {
+                    console.error("Erro ao guardar notas:", error);
+                    alert("Erro ao guardar as notas. Verifique as permissões ou a conexão.");
+                } finally {
+                    btnSalvarNotas.innerText = "Guardar Notas";
+                    btnSalvarNotas.disabled = false;
+                }
+            });
+        }
+
+        // --- LÓGICA DE ATIVIDADES ---
+        async function loadAtividadesCriadas() {
+            const tbody = document.getElementById('listaAtividadesProf');
+            if (!tbody) return;
+
+            try {
+                tbody.innerHTML = '<tr><td colspan="5" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar atividades...</td></tr>';
+                const uids = Array.from(new Set([currentAuthUid, currentProfUid].filter(Boolean)));
+                const map = new Map();
+                for (const uid of uids) {
+                    const qs = await getDocs(query(collection(db, "atividades"), where("professorId", "==", uid)));
+                    qs.forEach(d => map.set(d.id, { id: d.id, ...d.data() }));
+                }
+
+                atividadesCache = Array.from(map.values()).sort((a, b) => parseTimestampMs(b.dataCriacao) - parseTimestampMs(a.dataCriacao));
+
+                const dashAtiv = document.getElementById('dashTotalAtividades');
+                if (dashAtiv) dashAtiv.innerText = atividadesCache.length;
+
+                if (!atividadesCache.length) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="padding:1.5rem; text-align:center; color:#64748b;">Sem atividades criadas.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                for (const ativ of atividadesCache) {
+                    const tId = ativ.turmaId || ativ.turma || '';
+                    const tName = await getTurmaName(tId);
+                    const totalConc = Array.isArray(ativ.alunosConcluidos) ? ativ.alunosConcluidos.length : 0;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>
+                            <div style="font-weight: 500; color: #1e293b;">${esc(ativ.descricao || 'Sem descrição')}</div>
+                            <div style="font-size:0.8rem; color:#94a3b8; margin-top:0.25rem;">${esc(formatDateValue(ativ.dataCriacao))}</div>
+                        </td>
+                        <td>
+                            <strong>${esc(tName)}</strong><br>
+                            <span style="font-size:0.85rem; color:#64748b;">${esc(ativ.disciplina || '--')}</span>
+                        </td>
+                        <td>
+                            <span class="badge" style="background: ${ativ.tipo === 'casa' ? '#e0e7ff' : '#dcfce7'}; color: ${ativ.tipo === 'casa' ? '#4f46e5' : '#16a34a'}; text-transform: uppercase;">
+                                ${ativ.tipo === 'casa' ? 'Casa' : 'Sala'}
+                            </span>
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="badge badge-aluno">${totalConc} aluno(s)</span>
+                        </td>
+                        <td style="text-align: center;">
+                            <div style="display: flex; gap: 0.45rem; justify-content: center;">
+                                <button type="button" onclick="window.abrirModalAtividade('${esc(ativ.id)}')" style="background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; width: 34px; height: 34px; border-radius: 8px; cursor: pointer;" title="Gerir Conclusões">
+                                    <i class="fa-solid fa-users"></i>
+                                </button>
+                                <button type="button" onclick="window.editarAtividade('${esc(ativ.id)}')" style="background: #fffbeb; color: #d97706; border: 1px solid #fde68a; width: 34px; height: 34px; border-radius: 8px; cursor: pointer;" title="Editar Atividade">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button type="button" onclick="window.excluirAtividade('${esc(ativ.id)}')" style="background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; width: 34px; height: 34px; border-radius: 8px; cursor: pointer;" title="Excluir Atividade">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
                 }
             } catch (err) {
                 console.error("Erro loadAtividadesCriadas:", err);
-                tbody.innerHTML = '<tr><td colspan="4" style="padding:1.5rem; text-align:center; color:#ef4444;">Erro ao carregar atividades.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="padding:1.5rem; text-align:center; color:#ef4444;">Erro ao carregar atividades.</td></tr>';
             }
         }
 
         const formCriar = document.getElementById('formCriarAtividade');
-        if(formCriar) {
+        if (formCriar) {
             formCriar.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = document.getElementById('btnSalvarNovaAtividade');
-                const turmaId = document.getElementById('ativTurmaSelect').value;
-                const disciplina = document.getElementById('ativDisciplinaSelect').value;
-                const tipo = document.getElementById('ativTipoSelect').value;
-                const descricao = document.getElementById('ativDescricao').value;
+                const turmaId = document.getElementById('ativTurmaSelect')?.value;
+                const disciplina = document.getElementById('ativDisciplinaSelect')?.value;
+                const tipo = document.getElementById('ativTipoSelect')?.value;
+                const descricao = document.getElementById('ativDescricao')?.value.trim();
 
-                if(!turmaId || !disciplina || !tipo || !descricao) {
-                    alert("Preencha todos os campos.");
+                if (!turmaId || !disciplina || !tipo || !descricao) {
+                    alert("Preencha todos os campos da atividade.");
                     return;
                 }
-                
-                btn.innerText = 'A guardar...';
-                btn.disabled = true;
-                
+
+                if (btn) { btn.innerText = 'A guardar...'; btn.disabled = true; }
+
                 try {
                     await addDoc(collection(db, "atividades"), {
+                        turma: turmaId,
                         turmaId: turmaId,
                         disciplina: disciplina,
                         tipo: tipo,
                         descricao: descricao,
-                        professorId: currentProfUid,
+                        professorId: currentAuthUid || currentProfUid,
                         alunosConcluidos: [],
                         dataCriacao: new Date().toISOString()
                     });
                     formCriar.reset();
-                    
-                    const toast = document.getElementById('toastNotification');
-                    const msgEl = document.getElementById('toastMsg');
-                    const originalMsg = msgEl.innerText;
-                    msgEl.innerText = `Atividade criada com sucesso!`;
-                    toast.style.display = 'flex';
-                    setTimeout(() => { toast.style.display = 'none'; msgEl.innerText = originalMsg; }, 3000);
-                    
+                    showToast("Atividade criada com sucesso!");
                     await loadAtividadesCriadas();
-                } catch(err) {
+                } catch (err) {
                     console.error("Erro criar atividade:", err);
                     alert("Erro ao criar atividade.");
                 } finally {
-                    btn.innerText = 'Criar Atividade';
-                    btn.disabled = false;
+                    if (btn) { btn.innerText = 'Criar Atividade'; btn.disabled = false; }
                 }
             });
         }
 
-        window.abrirModalAtividade = async function(atividadeId) {
+        window.abrirModalAtividade = async function (atividadeId) {
             modalAtividadeAtualId = atividadeId;
             const atividade = atividadesCache.find(a => a.id === atividadeId);
-            if(!atividade) return;
-            
+            if (!atividade) return;
+
             const container = document.getElementById('modalAtividadesListaAlunos');
-            if(!container) return;
-            
+            const modal = document.getElementById('modalAtividades');
+            if (!container || !modal) return;
+
             container.innerHTML = '<div style="padding:1rem; text-align:center; color:#64748b;">A carregar alunos...</div>';
-            document.getElementById('modalAtividades').style.display = 'flex';
-            
+            modal.classList.add('active');
+
             try {
-                // Fetch alunos for this turma
-                const qA = query(collection(db, "users"), where("role", "==", "aluno"), where("turmaId", "==", atividade.turmaId));
-                const qsA = await getDocs(qA);
-                
-                if (qsA.empty) {
+                const tId = atividade.turmaId || atividade.turma || '';
+                const alunos = await fetchAlunosByTurma(tId);
+
+                if (!alunos.length) {
                     container.innerHTML = '<div style="padding:1rem; text-align:center; color:#ef4444;">Sem alunos nesta turma.</div>';
                     return;
                 }
-                
+
                 container.innerHTML = '';
-                const concluidos = atividade.alunosConcluidos || [];
-                
-                qsA.forEach(docSnap => {
-                    const aluno = docSnap.data();
+                const concluidos = Array.isArray(atividade.alunosConcluidos) ? atividade.alunosConcluidos : [];
+
+                alunos.forEach(aluno => {
                     const isChecked = concluidos.includes(aluno.uid) ? 'checked' : '';
-                    
                     container.innerHTML += `
-                        <label style="display: flex; align-items: center; gap: 10px; padding: 0.75rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
-                            <input type="checkbox" class="aluno-conclusao-checkbox" value="${aluno.uid}" ${isChecked} style="width: 1.25rem; height: 1.25rem; accent-color: var(--primary-color); cursor: pointer;">
-                            <span style="font-weight: 500; color: #334155;">${aluno.name}</span>
-                            <span style="margin-left: auto; font-size: 0.8rem; color: #94a3b8;">${aluno.matricula}</span>
+                        <label class="checklist-item">
+                            <input type="checkbox" class="aluno-conclusao-checkbox" value="${esc(aluno.uid)}" ${isChecked}>
+                            <span style="font-weight: 600; color: #334155;">${esc(aluno.name)}</span>
+                            <span style="margin-left: auto; font-size: 0.8rem; color: #94a3b8;">Matrícula: ${esc(aluno.matricula || 'N/A')}</span>
                         </label>
                     `;
                 });
-            } catch(err) {
+            } catch (err) {
                 console.error("Erro abrirModalAtividade:", err);
                 container.innerHTML = '<div style="padding:1rem; text-align:center; color:#ef4444;">Erro ao carregar alunos.</div>';
             }
@@ -898,110 +1139,252 @@
         const btnSalvarConclusoes = document.getElementById('btnSalvarConclusoes');
         if (btnSalvarConclusoes) {
             btnSalvarConclusoes.addEventListener('click', async () => {
-                if(!modalAtividadeAtualId) return;
-                
-                const btn = btnSalvarConclusoes;
-                btn.innerText = "A salvar...";
-                btn.disabled = true;
-                
+                if (!modalAtividadeAtualId) return;
+
+                btnSalvarConclusoes.innerText = "A salvar...";
+                btnSalvarConclusoes.disabled = true;
+
                 try {
                     const checkboxes = document.querySelectorAll('.aluno-conclusao-checkbox');
                     const novosConcluidos = [];
                     checkboxes.forEach(cb => {
                         if (cb.checked) novosConcluidos.push(cb.value);
                     });
-                    
+
                     await updateDoc(doc(db, "atividades", modalAtividadeAtualId), {
                         alunosConcluidos: novosConcluidos
                     });
-                    
-                    document.getElementById('modalAtividades').style.display = 'none';
-                    
-                    const toast = document.getElementById('toastNotification');
-                    const msgEl = document.getElementById('toastMsg');
-                    const originalMsg = msgEl.innerText;
-                    msgEl.innerText = `Conclusões salvas com sucesso!`;
-                    toast.style.display = 'flex';
-                    setTimeout(() => { toast.style.display = 'none'; msgEl.innerText = originalMsg; }, 3000);
-                    
-                    await loadAtividadesCriadas(); // refresh list
-                } catch(err) {
+
+                    const modal = document.getElementById('modalAtividades');
+                    if (modal) modal.classList.remove('active');
+                    showToast("Conclusões salvas com sucesso!");
+                    await loadAtividadesCriadas();
+                } catch (err) {
                     console.error("Erro salvar conclusoes:", err);
                     alert("Erro ao salvar conclusões.");
                 } finally {
-                    btn.innerText = "Salvar";
-                    btn.disabled = false;
+                    btnSalvarConclusoes.innerText = "Salvar";
+                    btnSalvarConclusoes.disabled = false;
                 }
             });
         }
 
-        window.excluirAtividade = async function(id) {
+        window.excluirAtividade = async function (id) {
+            if (!id) return;
             if (confirm("Tem a certeza que deseja apagar esta atividade?")) {
                 try {
                     await deleteDoc(doc(db, "atividades", id));
-                    
-                    const toast = document.getElementById('toastNotification');
-                    const msgEl = document.getElementById('toastMsg');
-                    const originalMsg = msgEl.innerText;
-                    msgEl.innerText = `Atividade excluída!`;
-                    toast.style.display = 'flex';
-                    setTimeout(() => { toast.style.display = 'none'; msgEl.innerText = originalMsg; }, 3000);
-                    
+                    showToast("Atividade excluída!");
                     await loadAtividadesCriadas();
-                } catch(error) {
-                    console.error("Erro apagar atividade: ", error);
+                } catch (error) {
+                    console.error("Erro apagar atividade:", error);
                     alert("Erro ao excluir a atividade.");
                 }
             }
         };
 
-        let atividadeEditandoId = null;
-        window.editarAtividade = function(id) {
+        window.editarAtividade = function (id) {
             atividadeEditandoId = id;
             const atividade = atividadesCache.find(a => a.id === id);
-            if(!atividade) return;
-            
-            document.getElementById('editarAtividadeDescricao').value = atividade.descricao;
-            document.getElementById('modalEditarAtividade').style.display = 'flex';
+            if (!atividade) return;
+
+            const selTurma = document.getElementById('editarAtividadeTurma');
+            const selDisc = document.getElementById('editarAtividadeDisciplina');
+            const selTipo = document.getElementById('editarAtividadeTipo');
+            const txtDesc = document.getElementById('editarAtividadeDescricao');
+            const modal = document.getElementById('modalEditarAtividade');
+
+            if (selTurma) {
+                const tId = atividade.turmaId || atividade.turma || '';
+                if (tId && !Array.from(selTurma.options).some(o => o.value === tId)) {
+                    selTurma.innerHTML += `<option value="${esc(tId)}">${esc(turmasCache[tId] || tId)}</option>`;
+                }
+                selTurma.value = tId;
+            }
+            if (selDisc) {
+                const dName = atividade.disciplina || '';
+                if (dName && !Array.from(selDisc.options).some(o => o.value === dName)) {
+                    selDisc.innerHTML += `<option value="${esc(dName)}">${esc(dName)}</option>`;
+                }
+                selDisc.value = dName;
+            }
+            if (selTipo) selTipo.value = atividade.tipo || 'casa';
+            if (txtDesc) txtDesc.value = atividade.descricao || '';
+            if (modal) modal.classList.add('active');
         };
 
-        const btnSalvarEdicao = document.getElementById('btnSalvarEdicaoAtividade');
-        if (btnSalvarEdicao) {
-            btnSalvarEdicao.addEventListener('click', async () => {
-                if(!atividadeEditandoId) return;
-                const novaDescricao = document.getElementById('editarAtividadeDescricao').value;
-                if(!novaDescricao) {
-                    alert("A descrição não pode estar vazia.");
+        const formEditarAtividade = document.getElementById('formEditarAtividade');
+        if (formEditarAtividade) {
+            formEditarAtividade.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!atividadeEditandoId) return;
+
+                const novaTurma = document.getElementById('editarAtividadeTurma')?.value;
+                const novaDisc = document.getElementById('editarAtividadeDisciplina')?.value;
+                const novoTipo = document.getElementById('editarAtividadeTipo')?.value;
+                const novaDescricao = document.getElementById('editarAtividadeDescricao')?.value.trim();
+                const btn = document.getElementById('btnSalvarEdicaoAtividade');
+
+                if (!novaTurma || !novaDisc || !novoTipo || !novaDescricao) {
+                    alert("Preencha todos os campos antes de guardar.");
                     return;
                 }
-                
-                btnSalvarEdicao.innerText = "A salvar...";
-                btnSalvarEdicao.disabled = true;
-                
+
+                if (btn) { btn.innerText = "A salvar..."; btn.disabled = true; }
+
                 try {
                     await updateDoc(doc(db, "atividades", atividadeEditandoId), {
+                        turma: novaTurma,
+                        turmaId: novaTurma,
+                        disciplina: novaDisc,
+                        tipo: novoTipo,
                         descricao: novaDescricao
                     });
-                    
-                    document.getElementById('modalEditarAtividade').style.display = 'none';
-                    
-                    const toast = document.getElementById('toastNotification');
-                    const msgEl = document.getElementById('toastMsg');
-                    const originalMsg = msgEl.innerText;
-                    msgEl.innerText = `Atividade atualizada!`;
-                    toast.style.display = 'flex';
-                    setTimeout(() => { toast.style.display = 'none'; msgEl.innerText = originalMsg; }, 3000);
-                    
+
+                    const modal = document.getElementById('modalEditarAtividade');
+                    if (modal) modal.classList.remove('active');
+                    showToast("Atividade atualizada com sucesso!");
                     await loadAtividadesCriadas();
-                } catch(error) {
-                    console.error("Erro editar atividade: ", error);
+                } catch (error) {
+                    console.error("Erro editar atividade:", error);
                     alert("Erro ao editar a atividade.");
                 } finally {
-                    btnSalvarEdicao.innerText = "Salvar";
-                    btnSalvarEdicao.disabled = false;
+                    if (btn) { btn.innerText = "Guardar Alterações"; btn.disabled = false; }
                 }
             });
         }
+
+        // --- MURAL DE AVISOS (PROFESSOR: APENAS TURMAS ALOCADAS) ---
+        async function loadAvisosProfessor() {
+            const tbody = document.getElementById('listaAvisosProf');
+            if (!tbody) return;
+            try {
+                tbody.innerHTML = '<tr><td colspan="5" style="padding:1.5rem; text-align:center; color:#64748b;">A carregar avisos...</td></tr>';
+                const uids = Array.from(new Set([currentAuthUid, currentProfUid].filter(Boolean)));
+                const map = new Map();
+                for (const uid of uids) {
+                    const qs = await getDocs(query(collection(db, "avisos"), where("autorId", "==", uid)));
+                    qs.forEach(d => map.set(d.id, { id: d.id, ...d.data() }));
+                }
+                avisosProfCache = Array.from(map.values()).sort((a, b) => parseTimestampMs(b.dataCriacao) - parseTimestampMs(a.dataCriacao));
+
+                if (!avisosProfCache.length) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="padding:1.5rem; text-align:center; color:#64748b;">Nenhum aviso publicado por si até ao momento.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                for (const av of avisosProfCache) {
+                    const turmaLabel = av.turma === 'todas' ? 'Toda a Escola' : await getTurmaName(av.turma);
+                    const isImp = av.prioridade === 'importante';
+                    const prioBadge = isImp
+                        ? '<span class="badge badge-importante"><i class="fa-solid fa-triangle-exclamation"></i> Importante</span>'
+                        : '<span class="badge badge-normal">Normal</span>';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="clickable-row" onclick="window.verAvisoProf('${esc(av.id)}')">
+                            <strong>${esc(av.titulo)}</strong>
+                            <div style="font-size: 0.82rem; color: #64748b; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(av.mensagem)}</div>
+                        </td>
+                        <td><span class="chip">${esc(turmaLabel)}</span></td>
+                        <td>${prioBadge}</td>
+                        <td>${esc(formatDateValue(av.dataCriacao))}</td>
+                        <td style="text-align: center;">
+                            <button type="button" onclick="window.verAvisoProf('${esc(av.id)}')" class="edit-btn" title="Ler Aviso">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button type="button" onclick="window.excluirAvisoProf('${esc(av.id)}')" class="action-btn" title="Excluir Aviso">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            } catch (err) {
+                console.error("Erro loadAvisosProfessor:", err);
+                tbody.innerHTML = '<tr><td colspan="5" style="padding:1.5rem; text-align:center; color:#ef4444;">Erro ao carregar avisos.</td></tr>';
+            }
+        }
+
+        const formCriarAvisoProf = document.getElementById('formCriarAvisoProf');
+        if (formCriarAvisoProf) {
+            formCriarAvisoProf.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('btnPublicarAvisoProf');
+                const titulo = document.getElementById('profAvisoTitulo')?.value.trim();
+                const turma = document.getElementById('profAvisoTurmaSelect')?.value;
+                const prioridade = document.getElementById('profAvisoPrioridade')?.value || 'normal';
+                const mensagem = document.getElementById('profAvisoMensagem')?.value.trim();
+
+                if (!titulo || !turma || !mensagem) {
+                    alert("Preencha o título, a turma e a mensagem do aviso.");
+                    return;
+                }
+                if (!minhasTurmas.has(turma)) {
+                    alert("Só é permitido enviar avisos para as turmas em que está alocado.");
+                    return;
+                }
+
+                if (btn) { btn.innerText = 'A publicar...'; btn.disabled = true; }
+
+                try {
+                    await addDoc(collection(db, "avisos"), {
+                        titulo: titulo,
+                        mensagem: mensagem,
+                        turma: turma,
+                        prioridade: prioridade === 'importante' ? 'importante' : 'normal',
+                        autorNome: "Prof. " + currentProfName,
+                        autorRole: 'professor',
+                        autorId: currentAuthUid || currentProfUid,
+                        dataCriacao: new Date().toISOString()
+                    });
+                    formCriarAvisoProf.reset();
+                    showToast("Aviso publicado para a turma!");
+                    await loadAvisosProfessor();
+                } catch (err) {
+                    console.error("Erro ao publicar aviso:", err);
+                    alert("Erro ao publicar aviso.");
+                } finally {
+                    if (btn) { btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Publicar Aviso'; btn.disabled = false; }
+                }
+            });
+        }
+
+        window.verAvisoProf = async function (id) {
+            const av = avisosProfCache.find(a => a.id === id);
+            if (!av) return;
+            const modal = document.getElementById('modalDetalheAvisoProf');
+            if (!modal) return;
+            const tEl = document.getElementById('mdlAvisoProfTitulo');
+            const bEl = document.getElementById('mdlAvisoProfBadge');
+            const trEl = document.getElementById('mdlAvisoProfTurma');
+            const dEl = document.getElementById('mdlAvisoProfData');
+            const mEl = document.getElementById('mdlAvisoProfMensagem');
+
+            if (tEl) tEl.innerText = av.titulo || 'Comunicado';
+            if (bEl) bEl.innerHTML = av.prioridade === 'importante'
+                ? '<span class="badge badge-importante"><i class="fa-solid fa-triangle-exclamation"></i> Importante</span>'
+                : '<span class="badge badge-normal">Normal</span>';
+            if (trEl) trEl.innerText = av.turma === 'todas' ? 'Toda a Escola' : await getTurmaName(av.turma);
+            if (dEl) dEl.innerText = formatDateValue(av.dataCriacao);
+            if (mEl) mEl.innerText = av.mensagem || '';
+            modal.classList.add('active');
+        };
+
+        window.excluirAvisoProf = async function (id) {
+            if (!id) return;
+            if (confirm("Deseja excluir este aviso?")) {
+                try {
+                    await deleteDoc(doc(db, "avisos", id));
+                    showToast("Aviso excluído!");
+                    await loadAvisosProfessor();
+                } catch (err) {
+                    console.error("Erro ao excluir aviso:", err);
+                    alert("Erro ao excluir o aviso.");
+                }
+            }
+        };
     </script>
 </body>
 

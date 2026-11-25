@@ -24,7 +24,8 @@ export async function routeForProfile(profile) {
     if (!profile) return null;
     if (profile.role === 'coordenador') return 'painel_coordenador.html';
     if (profile.role === 'professor') return 'painel_professor.html';
-    if (profile.role === 'aluno' || profile.role === 'pais') return 'painel_aluno.html';
+    if (profile.role === 'aluno') return 'painel_aluno.html';
+    if (profile.role === 'pais') return 'painel_pais.html';
     return null;
 }
 
