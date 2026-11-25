@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Aluno | Colégio Veras</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=20261124">
 </head>
 
 <body>
@@ -41,7 +41,7 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="header">
+            <div class="header main-header">
                 <div class="header-left">
                     <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menu">
                         <i class="fa-solid fa-bars"></i>
@@ -52,7 +52,7 @@
                     <span id="studentName">A carregar...</span>
                     <i class="fa-solid fa-circle-user" style="font-size: 2rem; color: var(--primary-color);"></i>
                 </div>
-            </header>
+            </div>
 
             <div id="welcomeMessage"
                 style="margin-bottom: 1.75rem; font-size: 1.05rem; color: #475569; display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem;">
@@ -253,7 +253,7 @@
 
     <script type="module">
         import { auth, db } from './js/firebase-config.js';
-        import { esc } from './js/auth-utils.js';
+        import { esc, extractAttendanceFromDiary, normalizeBimestre } from './js/auth-utils.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
@@ -330,7 +330,7 @@
                 if (typeof val.toDate === 'function') return val.toDate().toLocaleDateString('pt-BR');
                 const d = new Date(val);
                 if (!isNaN(d.getTime())) return d.toLocaleDateString('pt-BR');
-            } catch (e) { /* ignore */ }
+            } catch (e) { console.error("[catch]", e?.code, e?.message, e); /* ignore */ }
             return "Data não disponível";
         }
 
@@ -340,7 +340,7 @@
                 if (typeof val.toDate === 'function') return val.toDate().getTime();
                 const t = new Date(val).getTime();
                 return isNaN(t) ? 0 : t;
-            } catch (e) {
+            } catch (e) { console.error("[catch]", e?.code, e?.message, e);
                 return 0;
             }
         }
@@ -418,6 +418,7 @@
 
                 window.targetStudentUid = studentUid;
                 window.targetStudentDocId = userDocId;
+                window.targetStudentKeys = [studentUid, userDocId, userData.matricula, userData.name].filter(Boolean);
 
                 const rawTurma = userData.turmaId || userData.turma || '';
                 const { turmaId, turmaNome } = await resolveTurma(rawTurma);
@@ -498,7 +499,7 @@
                     try {
                         const qs = await getDocs(qH);
                         qs.forEach(d => horarioDocs.set(d.id, d.data()));
-                    } catch (e) { /* fallback */ }
+                    } catch (e) { console.error("[catch]", e?.code, e?.message, e); /* fallback */ }
                 }
 
                 const extraHoras = [];
@@ -545,30 +546,30 @@
             if (!dashFaltas) return;
             try {
                 const diariosMap = new Map();
-                const queries = [query(collection(db, "diarios"), where("turmaId", "==", turmaId))];
-                queries.push(query(collection(db, "diarios"), where("turma", "==", turmaId)));
-
-                for (const qD of queries) {
+                const queries = [
+                    ['diarios turmaId', query(collection(db, "diarios"), where("turmaId", "==", turmaId))],
+                    ['diarios turma', query(collection(db, "diarios"), where("turma", "==", turmaId))]
+                ];
+                for (const [label, qD] of queries) {
                     try {
                         const qs = await getDocs(qD);
                         qs.forEach(d => diariosMap.set(d.id, d.data()));
-                    } catch (e) { /* fallback */ }
+                    } catch (e) {
+                        console.error(`[Faltas - ${label}]`, e?.code, e?.message, e);
+                    }
                 }
 
+                const keys = (window.targetStudentKeys && window.targetStudentKeys.length)
+                    ? window.targetStudentKeys
+                    : [alunoUid, alunoDocId];
                 let totalFaltas = 0;
-                const keysToCheck = Array.from(new Set([alunoUid, alunoDocId].filter(Boolean)));
-
                 diariosMap.forEach(docData => {
-                    const isFalta = keysToCheck.some(k =>
-                        (docData.chamadas && docData.chamadas[k] === 'Falta') ||
-                        (docData.presencas && docData.presencas[k] === 'F')
-                    );
-                    if (isFalta) totalFaltas++;
+                    if (extractAttendanceFromDiary(docData, keys) === 'Falta') totalFaltas++;
                 });
 
                 dashFaltas.innerText = totalFaltas;
             } catch (error) {
-                console.error("Erro ao carregar faltas:", error);
+                console.error("[Faltas]", error?.code, error?.message, error);
                 dashFaltas.innerText = "--";
             }
         }
@@ -579,19 +580,29 @@
             try {
                 const notasMap = new Map();
                 const ids = Array.from(new Set([alunoUid, alunoDocId].filter(Boolean)));
+                let attempts = 0, failures = 0, lastErr = null;
                 for (const id of ids) {
+                    attempts++;
                     try {
                         const qs = await getDocs(query(collection(db, "notas"), where("alunoId", "==", id)));
                         qs.forEach(d => notasMap.set(d.id, d.data()));
-                    } catch (e) { /* ignore */ }
+                    } catch (e) {
+                        failures++;
+                        lastErr = e;
+                        console.error("[Boletim - notas alunoId]", e?.code, e?.message, e);
+                    }
                 }
 
                 if (notasMap.size === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#64748b;"><i class="fa-solid fa-info-circle"></i> Nenhuma nota lançada até ao momento.</td></tr>';
+                    if (attempts > 0 && failures === attempts) {
+                        tbody.innerHTML = `<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao carregar o boletim (${esc(lastErr?.code || 'erro')}).</td></tr>`;
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#64748b;"><i class="fa-solid fa-info-circle"></i> Nenhuma nota lançada até ao momento.</td></tr>';
+                    }
                     return;
                 }
 
-                const notas = Array.from(notasMap.values()).sort((a, b) => {
+                const notas = Array.from(notasMap.values()).map(n => ({ ...n, bimestre: normalizeBimestre(n.bimestre) })).sort((a, b) => {
                     if ((a.disciplina || '') === (b.disciplina || '')) {
                         return (a.bimestre || '').localeCompare(b.bimestre || '');
                     }
@@ -611,8 +622,8 @@
                     `;
                 });
             } catch (error) {
-                console.error("Erro ao carregar boletim:", error);
-                tbody.innerHTML = '<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao carregar o boletim.</td></tr>';
+                console.error("[Boletim]", error?.code, error?.message, error);
+                tbody.innerHTML = `<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao carregar o boletim (${esc(error?.code || 'erro')}).</td></tr>`;
             }
         }
 
@@ -636,7 +647,7 @@
                     try {
                         const qs = await getDocs(qA);
                         qs.forEach(d => ativsMap.set(d.id, { id: d.id, ...d.data() }));
-                    } catch (e) { /* fallback */ }
+                    } catch (e) { console.error("[catch]", e?.code, e?.message, e); /* fallback */ }
                 }
 
                 const allAtivs = Array.from(ativsMap.values()).sort((a, b) => parseTimestampMs(b.dataCriacao) - parseTimestampMs(a.dataCriacao));
@@ -782,7 +793,7 @@
                     try {
                         const qs = await getDocs(query(collection(db, "avisos"), where("turma", "==", target)));
                         qs.forEach(d => avisosMap.set(d.id, { id: d.id, ...d.data() }));
-                    } catch (e) { /* fallback */ }
+                    } catch (e) { console.error("[catch]", e?.code, e?.message, e); /* fallback */ }
                 }
 
                 const avisosList = Array.from(avisosMap.values()).sort(

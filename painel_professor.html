@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal do Docente | Colégio Veras</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=20261124">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -45,7 +45,7 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="header">
+            <div class="header main-header">
                 <div class="header-left">
                     <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menu">
                         <i class="fa-solid fa-bars"></i>
@@ -56,7 +56,7 @@
                     <span id="profName">A carregar...</span>
                     <i class="fa-solid fa-circle-user" style="font-size: 2rem; color: var(--primary-color);"></i>
                 </div>
-            </header>
+            </div>
 
             <!-- TABS -->
 
@@ -424,7 +424,7 @@
 
     <script type="module">
         import { auth, db } from './js/firebase-config.js';
-        import { esc, parseDisciplinas } from './js/auth-utils.js';
+        import { esc, parseDisciplinas, normalizeBimestre } from './js/auth-utils.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
         import { collection, query, where, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
@@ -459,7 +459,7 @@
                 if (typeof val.toDate === 'function') return val.toDate().toLocaleDateString('pt-BR');
                 const d = new Date(val);
                 if (!isNaN(d.getTime())) return d.toLocaleDateString('pt-BR');
-            } catch (e) { /* ignore */ }
+            } catch (e) { console.error("[catch]", e?.code, e?.message, e); /* ignore */ }
             return "--";
         }
 
@@ -469,7 +469,7 @@
                 if (typeof val.toDate === 'function') return val.toDate().getTime();
                 const t = new Date(val).getTime();
                 return isNaN(t) ? 0 : t;
-            } catch (e) {
+            } catch (e) { console.error("[catch]", e?.code, e?.message, e);
                 return 0;
             }
         }
@@ -624,23 +624,40 @@
         async function fetchAlunosByTurma(turmaId) {
             if (!turmaId) return [];
             const alunosMap = new Map();
-            try {
-                const qs1 = await getDocs(query(collection(db, "users"), where("role", "==", "aluno"), where("turmaId", "==", turmaId)));
-                qs1.forEach(docSnap => {
-                    const data = docSnap.data();
-                    const uid = data.uid || docSnap.id;
-                    alunosMap.set(uid, { docId: docSnap.id, uid, ...data });
-                });
-            } catch (e) { console.error("Erro fetchAlunos turmaId:", e); }
+            const turmaNomeRaw = await getTurmaName(turmaId);
+            const turmaNome = turmaNomeRaw && turmaNomeRaw !== "Turma Desconhecida" ? turmaNomeRaw : '';
 
-            try {
-                const qs2 = await getDocs(query(collection(db, "users"), where("role", "==", "aluno"), where("turma", "==", turmaId)));
-                qs2.forEach(docSnap => {
+            const addDocs = (qs) => {
+                qs.forEach(docSnap => {
                     const data = docSnap.data();
+                    if (data.role !== 'aluno') return;
                     const uid = data.uid || docSnap.id;
-                    if (!alunosMap.has(uid)) alunosMap.set(uid, { docId: docSnap.id, uid, ...data });
+                    if (!alunosMap.has(uid)) alunosMap.set(uid, { ...data, docId: docSnap.id, uid });
                 });
-            } catch (e) { console.error("Erro fetchAlunos turma:", e); }
+            };
+            const run = async (label, q) => {
+                try { addDocs(await getDocs(q)); }
+                catch (e) { console.error(`[fetchAlunosByTurma ${label}]`, e?.code, e?.message, e); }
+            };
+
+            // Consultas de campo único (sem índices compostos); role filtrado em memória
+            await run('turmaId', query(collection(db, "users"), where("turmaId", "==", turmaId)));
+            await run('turma', query(collection(db, "users"), where("turma", "==", turmaId)));
+            if (turmaNome) await run('turma=nome', query(collection(db, "users"), where("turma", "==", turmaNome)));
+
+            if (alunosMap.size === 0) {
+                try {
+                    const qs = await getDocs(query(collection(db, "users"), where("role", "==", "aluno")));
+                    qs.forEach(docSnap => {
+                        const data = docSnap.data();
+                        const match = data.turmaId === turmaId || data.turma === turmaId ||
+                            (turmaNome && (data.turma === turmaNome || data.turmaId === turmaNome));
+                        if (!match) return;
+                        const uid = data.uid || docSnap.id;
+                        if (!alunosMap.has(uid)) alunosMap.set(uid, { ...data, docId: docSnap.id, uid });
+                    });
+                } catch (e) { console.error("[fetchAlunosByTurma role]", e?.code, e?.message, e); }
+            }
 
             return Array.from(alunosMap.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         }
@@ -884,25 +901,46 @@
                     return;
                 }
 
+                // Notas existentes: leitura NÃO fatal (falhas apenas são registadas)
                 const notasMap = {};
                 const docsMap = {};
                 if (disciplina && bimestre) {
-                    const qsN = await getDocs(query(collection(db, "notas"), where("turmaId", "==", turmaId)));
-                    qsN.forEach(d => {
-                        const data = d.data();
-                        if (data.disciplina === disciplina && data.bimestre === bimestre) {
-                            notasMap[data.alunoId] = data.nota;
-                            docsMap[data.alunoId] = d.id;
+                    const found = new Map();
+                    const run = async (label, q) => {
+                        try {
+                            const qs = await getDocs(q);
+                            qs.forEach(d => found.set(d.id, d.data()));
+                        } catch (err) {
+                            console.error(`[Caderneta - ${label}]`, err?.code, err?.message, err);
                         }
+                    };
+                    const uids = Array.from(new Set([currentAuthUid, currentProfUid].filter(Boolean)));
+                    for (const uid of uids) {
+                        await run('notas professorId', query(collection(db, "notas"), where("professorId", "==", uid)));
+                    }
+                    await run('notas turmaId', query(collection(db, "notas"), where("turmaId", "==", turmaId)));
+                    await run('notas turma', query(collection(db, "notas"), where("turma", "==", turmaId)));
+
+                    const bimNorm = normalizeBimestre(bimestre);
+                    found.forEach((data, id) => {
+                        const sameTurma = data.turmaId === turmaId || data.turma === turmaId || !data.turmaId;
+                        if (!sameTurma) return;
+                        if (data.disciplina !== disciplina) return;
+                        if (normalizeBimestre(data.bimestre) !== bimNorm) return;
+                        [data.alunoId, data.alunoDocId].filter(Boolean).forEach(key => {
+                            notasMap[key] = data.nota;
+                            docsMap[key] = id;
+                        });
                     });
                 }
 
                 tbody.innerHTML = '';
                 alunos.forEach(aluno => {
-                    const notaAtual = notasMap[aluno.uid] !== undefined ? notasMap[aluno.uid] : '';
-                    const docIdAtual = docsMap[aluno.uid] || '';
+                    const notaAtual = notasMap[aluno.uid] !== undefined ? notasMap[aluno.uid]
+                        : (notasMap[aluno.docId] !== undefined ? notasMap[aluno.docId] : '');
+                    const docIdAtual = docsMap[aluno.uid] || docsMap[aluno.docId] || '';
                     tbody.innerHTML += `
-                        <tr data-uid="${esc(aluno.uid)}" data-docid="${esc(docIdAtual)}">
+                        <tr data-uid="${esc(aluno.uid)}" data-alunodocid="${esc(aluno.docId)}" data-docid="${esc(docIdAtual)}">
                             <td>
                                 <strong>${esc(aluno.name)}</strong><br>
                                 <span style="font-size:0.85rem; color:#64748b;">Matrícula: ${esc(aluno.matricula || 'N/A')}</span>
@@ -915,8 +953,8 @@
                     `;
                 });
             } catch (error) {
-                console.error("Erro ao carregar notas:", error);
-                tbody.innerHTML = '<tr><td colspan="2" style="padding:1.5rem; text-align:center; color:#ef4444;">Erro ao carregar alunos/notas.</td></tr>';
+                console.error("[Caderneta - carregar alunos/notas]", error?.code, error?.message, error);
+                tbody.innerHTML = `<tr><td colspan="2" style="padding:1.5rem; text-align:center; color:#ef4444;">Erro ao carregar alunos/notas (${esc(error?.code || 'erro')}).</td></tr>`;
             }
         }
 
@@ -959,6 +997,7 @@
                                 const newDoc = await addDoc(collection(db, "notas"), {
                                     alunoId: alunoId,
                                     turmaId: turmaId,
+                                    turma: turmaId,
                                     disciplina: disciplina,
                                     bimestre: bimestre,
                                     nota: numericNota,

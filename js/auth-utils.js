@@ -86,3 +86,82 @@ export function intervaloHora(hora) {
     if (!m) return null;
     return { inicio: (+m[1]) * 60 + (+m[2]), fim: (+m[3]) * 60 + (+m[4]) };
 }
+
+
+/** Normaliza o bimestre ("1", "1º", "1o Bimestre", "Bimestre 1") para "1º Bimestre". */
+export function normalizeBimestre(raw) {
+    const s = String(raw ?? '').trim();
+    const m = s.match(/([1-4])/);
+    return m ? `${m[1]}º Bimestre` : s;
+}
+
+function classifyStatus(v) {
+    if (v === true) return 'Presente';
+    if (v === false) return 'Falta';
+    if (v && typeof v === 'object') {
+        const inner = v.status ?? v.presente ?? v.situacao;
+        return inner === undefined ? null : classifyStatus(inner);
+    }
+    const s = String(v ?? '').trim().toLowerCase();
+    if (['falta', 'f', 'ausente', 'faltou', 'false'].includes(s)) return 'Falta';
+    if (['presente', 'p', 'presenca', 'presença', 'true'].includes(s)) return 'Presente';
+    return null;
+}
+
+/**
+ * Lê a situação de um aluno num diário (formatos: chamadas / presencas / faltas,
+ * chaveados por uid, id do documento, matrícula ou nome).
+ * Devolve 'Falta' | 'Presente' | null (aluno não consta no registo).
+ */
+export function extractAttendanceFromDiary(docData, studentKeys) {
+    const keys = (studentKeys || []).filter(Boolean).map(String);
+    if (!docData || !keys.length) return null;
+    const lower = keys.map(k => k.toLowerCase());
+
+    const fromMap = (map) => {
+        if (!map || typeof map !== 'object') return null;
+        if (Array.isArray(map)) {
+            for (const item of map) {
+                if (typeof item === 'string') { if (keys.includes(item)) return 'Presente'; continue; }
+                if (item && typeof item === 'object') {
+                    const id = item.uid ?? item.alunoId ?? item.id ?? item.nome ?? item.name;
+                    if (id !== undefined && keys.includes(String(id))) {
+                        return classifyStatus(item.status ?? item.presente ?? item.situacao ?? 'P');
+                    }
+                }
+            }
+            return null;
+        }
+        for (const [k, v] of Object.entries(map)) {
+            if (lower.includes(String(k).toLowerCase())) {
+                const r = classifyStatus(v);
+                if (r) return r;
+            }
+        }
+        return null;
+    };
+
+    const r1 = fromMap(docData.chamadas);
+    if (r1) return r1;
+    const r2 = fromMap(docData.presencas);
+    if (r2) return r2;
+
+    const f = docData.faltas;
+    if (Array.isArray(f)) {
+        const hit = f.some(item => {
+            if (typeof item === 'string') return lower.includes(item.toLowerCase());
+            if (item && typeof item === 'object') {
+                const id = item.uid ?? item.alunoId ?? item.id ?? item.nome ?? item.name;
+                return id !== undefined && lower.includes(String(id).toLowerCase());
+            }
+            return false;
+        });
+        if (hit) return 'Falta';
+        if (docData.alunos || Number(docData.totalAlunos) > 0) return 'Presente';
+    } else if (f && typeof f === 'object') {
+        for (const [k, v] of Object.entries(f)) {
+            if (lower.includes(String(k).toLowerCase()) && v) return 'Falta';
+        }
+    }
+    return null;
+}

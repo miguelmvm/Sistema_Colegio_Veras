@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Coordenador | Colégio Veras</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=20261124">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -47,7 +47,7 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="header">
+            <div class="header main-header">
                 <div class="header-left">
                     <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menu">
                         <i class="fa-solid fa-bars"></i>
@@ -58,7 +58,7 @@
                     <span id="adminName">Coordenador / Admin</span>
                     <i class="fa-solid fa-circle-user" style="font-size: 2rem; color: var(--primary-color);"></i>
                 </div>
-            </header>
+            </div>
 
             <!-- TAB: DASHBOARD -->
             <div id="tab-dashboard" class="tab-content active">
@@ -719,13 +719,15 @@
 
     <script type="module">
         import { auth, secondaryAuth, db } from './js/firebase-config.js';
-        import { esc, parseDisciplinas, horasDoTurno } from './js/auth-utils.js';
-        import { onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+        import { esc, parseDisciplinas, horasDoTurno, extractAttendanceFromDiary, normalizeBimestre } from './js/auth-utils.js';
+        import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
         import { collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, serverTimestamp, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
         const ALLOWED_CREATE_ROLES = ['aluno', 'professor', 'pais'];
         let currentAdminUid = '';
         let currentAdminName = 'Coordenador';
+        let adminDocByUidExists = null;
+        let adminActualDocId = null;
         let turmasCacheMap = {}; // id -> { id, nome, turno, serie }
         let alunosCacheList = []; // [{ docId, uid, name, matricula, turmaId, ... }]
         let usuariosCacheList = [];
@@ -739,7 +741,7 @@
                 if (typeof val.toDate === 'function') return val.toDate().toLocaleDateString('pt-BR');
                 const d = new Date(val);
                 if (!isNaN(d.getTime())) return d.toLocaleDateString('pt-BR');
-            } catch (e) { /* ignore */ }
+            } catch (e) { console.error("[catch]", e?.code, e?.message, e); /* ignore */ }
             return "N/A";
         }
 
@@ -749,7 +751,7 @@
                 if (typeof val.toDate === 'function') return val.toDate().getTime();
                 const t = new Date(val).getTime();
                 return isNaN(t) ? 0 : t;
-            } catch (e) {
+            } catch (e) { console.error("[catch]", e?.code, e?.message, e);
                 return 0;
             }
         }
@@ -830,11 +832,18 @@
             try {
                 let userData = null;
                 const directSnap = await getDoc(doc(db, "users", user.uid));
+                adminDocByUidExists = directSnap.exists();
+                adminActualDocId = directSnap.exists() ? directSnap.id : null;
                 if (directSnap.exists()) {
                     userData = directSnap.data();
                 } else {
                     const qs = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
-                    if (!qs.empty) userData = qs.docs[0].data();
+                    if (!qs.empty) {
+                        userData = qs.docs[0].data();
+                        adminActualDocId = qs.docs[0].id;
+                        console.warn("[Diagnóstico RBAC Coordenador] O documento do Coordenador em 'users' tem ID '" + adminActualDocId +
+                            "', diferente do Auth UID '" + user.uid + "'. Regras do Firestore baseadas em get(/users/$(request.auth.uid)) podem falhar até que o documento tenha ID igual ao UID.");
+                    }
                 }
 
                 if (!userData || userData.role !== 'coordenador') {
@@ -1093,13 +1102,43 @@
                     }
                 }
 
+                if (!auth.currentUser) {
+                    alert("Sessão do Coordenador inválida. Faça login novamente.");
+                    return;
+                }
+
                 if (btn) { btn.disabled = true; btn.innerText = "A criar..."; }
 
+                let newUid = "";
                 try {
-                    const userCredential = await createUserWithEmailAndPassword(secondaryAuth, finalEmail, password);
-                    await signOut(secondaryAuth);
+                    // 1) Conta no Firebase Auth via app SECUNDÁRIO (não desloga o Coordenador)
+                    try {
+                        const userCredential = await createUserWithEmailAndPassword(secondaryAuth, finalEmail, password);
+                        newUid = userCredential.user.uid;
+                    } catch (authErr) {
+                        console.error("[Criar Utilizador - secondaryAuth]", authErr?.code, authErr?.message, authErr);
+                        if (authErr?.code === 'auth/email-already-in-use') {
+                            // Conta órfã (criada antes, mas sem documento em users): tenta recuperar
+                            try {
+                                const retryCred = await signInWithEmailAndPassword(secondaryAuth, finalEmail, password);
+                                const candidateUid = retryCred.user.uid;
+                                const existingDoc = await getDoc(doc(db, "users", candidateUid));
+                                if (existingDoc.exists()) throw authErr;
+                                newUid = candidateUid;
+                            } catch (recoverErr) {
+                                console.error("[Criar Utilizador - recuperação de conta órfã]", recoverErr?.code, recoverErr?.message);
+                                throw authErr;
+                            }
+                        } else {
+                            throw authErr;
+                        }
+                    } finally {
+                        try { await signOut(secondaryAuth); } catch (soErr) {
+                            console.error("[signOut secondaryAuth]", soErr?.code, soErr?.message);
+                        }
+                    }
 
-                    const newUid = userCredential.user.uid;
+                    // 2) Documento no Firestore PRINCIPAL (db) — onde o Coordenador está autenticado
                     const userData = {
                         uid: newUid,
                         name,
@@ -1123,8 +1162,35 @@
                         userData.vinculoAlunoId = selectedAlunoUids[0];
                     }
 
-                    // Grava usando UID como ID do documento para compatibilidade total com Firestore Rules
-                    await setDoc(doc(db, "users", newUid), userData);
+                    try {
+                        await setDoc(doc(db, "users", newUid), userData);
+                    } catch (fsErr) {
+                        console.error("[Firestore setDoc users]", {
+                            code: fsErr?.code,
+                            message: fsErr?.message,
+                            coordinatorUid: auth.currentUser?.uid,
+                            adminDocByUidExists,
+                            adminActualDocId,
+                            newUid,
+                            payload: userData
+                        });
+                        if (fsErr?.code === 'permission-denied') {
+                            if (!adminDocByUidExists) {
+                                alert("Permissão negada pelo Firestore.\n\nCausa provável: o UID de autenticação do Coordenador (" + auth.currentUser?.uid +
+                                    ") não coincide com o ID do seu documento em 'users' (" + adminActualDocId + "). As regras do Firestore procuram users/" +
+                                    auth.currentUser?.uid + " para validar role 'coordenador'.\n\nCorrija no Console do Firebase: crie/copie o documento do Coordenador com ID igual ao UID.\n\n" +
+                                    "A conta de login (" + finalEmail + ") já foi criada; repita o cadastro depois da correção.");
+                            } else {
+                                alert("Permissão negada pelo Firestore ao gravar users/" + newUid + " (role '" + tipoUtilizador + "', código: " + fsErr.code +
+                                    ").\n\nO documento do Coordenador existe (UID " + auth.currentUser?.uid + "), então verifique as regras de 'users' (create para role " +
+                                    tipoUtilizador + " e campos permitidos, incl. vinculoAlunoIds/vinculoAlunoId). Detalhes no console (F12).\n\n" +
+                                    "A conta de login já foi criada; repita o cadastro depois de ajustar as regras.");
+                            }
+                        } else {
+                            alert("Erro ao gravar o utilizador no Firestore: " + (fsErr?.code || '') + " " + (fsErr?.message || fsErr));
+                        }
+                        return;
+                    }
 
                     alert('Credencial criada com sucesso!');
                     this.reset();
@@ -1134,8 +1200,8 @@
                     await refreshUsersTab();
                     await loadDashboardStats();
                 } catch (error) {
-                    console.error("Erro ao criar credencial:", error);
-                    alert("Erro ao criar credencial: " + (error.message || error));
+                    console.error("[Criar Utilizador]", error?.code, error?.message, error);
+                    alert("Erro ao criar credencial: " + (error?.code ? error.code + " - " : "") + (error?.message || error));
                 } finally {
                     if (btn) { btn.disabled = false; btn.innerText = "Gerar Credencial"; }
                 }
@@ -1517,7 +1583,7 @@
                                 document.getElementById('horarioModal')?.classList.remove('active');
                                 await loadHorarios(currentTurmaId);
                                 await loadDashboardStats();
-                            } catch (err) {
+                            } catch (err) { console.error("[catch]", err?.code, err?.message, err);
                                 alert("Erro ao remover aula: " + err.message);
                             }
                         };
@@ -1590,7 +1656,7 @@
                 document.getElementById('horarioModal')?.classList.remove('active');
                 await loadHorarios(currentTurmaId);
                 await loadDashboardStats();
-            } catch (err) { alert("Erro ao salvar aula: " + err.message); }
+            } catch (err) { console.error("[catch]", err?.code, err?.message, err); alert("Erro ao salvar aula: " + err.message); }
         });
 
         // --- DASHBOARD STATS & CHARTS ---
@@ -1913,18 +1979,18 @@
             const alunoUid = alunoData.uid || alunoData.docId;
             const alunoDocId = alunoData.docId || alunoData.uid;
             const idsToMatch = Array.from(new Set([alunoUid, alunoDocId].filter(Boolean)));
+            const studentKeys = Array.from(new Set([alunoUid, alunoDocId, alunoData.matricula, alunoData.name].filter(Boolean).map(String)));
             const turmaId = alunoData.turmaId || alunoData.turma || '';
+            const turmaNomeReal = (turmaNome && turmaNome !== 'Sem turma') ? turmaNome : '';
 
-            // 1. Buscar Responsáveis Vinculados
+            // 1. Responsáveis vinculados
             try {
                 const qsPais = await getDocs(query(collection(db, "users"), where("role", "==", "pais")));
                 const paisVinculados = [];
                 qsPais.forEach(d => {
                     const p = d.data();
                     const arr = Array.isArray(p.vinculoAlunoIds) ? p.vinculoAlunoIds : [];
-                    const matchesArr = idsToMatch.some(id => arr.includes(id));
-                    const matchesSingle = idsToMatch.includes(p.vinculoAlunoId);
-                    if (matchesArr || matchesSingle) {
+                    if (idsToMatch.some(id => arr.includes(id)) || idsToMatch.includes(p.vinculoAlunoId)) {
                         paisVinculados.push(p);
                     }
                 });
@@ -1942,98 +2008,144 @@
                     }
                 }
             } catch (err) {
-                console.error("Erro ao buscar responsáveis:", err);
-                if (respEl) respEl.innerHTML = '<span style="color:#ef4444;">Erro ao carregar responsáveis.</span>';
+                console.error("[Perfil Aluno - responsáveis]", err?.code, err?.message, err);
+                if (respEl) respEl.innerHTML = `<span style="color:#ef4444;">Erro ao carregar responsáveis (${esc(err?.code || 'erro')}).</span>`;
             }
 
-            // 2. Buscar Métricas Reais de Faltas / Assiduidade (coleção diarios)
+            // 2. Faltas / presenças / assiduidade (coleção diarios, com fallback legado)
             try {
-                let faltas = 0;
-                let presencas = 0;
-                if (turmaId) {
-                    const diariosMap = new Map();
-                    const q1 = await getDocs(query(collection(db, "diarios"), where("turmaId", "==", turmaId)));
-                    q1.forEach(d => diariosMap.set(d.id, d.data()));
-                    const q2 = await getDocs(query(collection(db, "diarios"), where("turma", "==", turmaId)));
-                    q2.forEach(d => diariosMap.set(d.id, d.data()));
+                const diariosMap = new Map();
+                const tryQuery = async (label, q, prefix = '') => {
+                    try {
+                        const qs = await getDocs(q);
+                        qs.forEach(d => diariosMap.set(prefix + d.id, d.data()));
+                        return true;
+                    } catch (err) {
+                        console.error(`[Perfil Aluno - ${label}]`, err?.code, err?.message, err);
+                        return false;
+                    }
+                };
 
-                    diariosMap.forEach(docData => {
-                        let statusFound = null;
-                        for (const id of idsToMatch) {
-                            if (docData.chamadas && docData.chamadas[id]) {
-                                statusFound = docData.chamadas[id];
-                                break;
-                            }
-                            if (docData.presencas && docData.presencas[id]) {
-                                statusFound = docData.presencas[id] === 'F' ? 'Falta' : 'Presente';
-                                break;
-                            }
-                        }
-                        if (statusFound === 'Falta') faltas++;
-                        else if (statusFound === 'Presente') presencas++;
-                    });
+                if (turmaId) {
+                    await tryQuery('diarios turmaId', query(collection(db, "diarios"), where("turmaId", "==", turmaId)));
+                    await tryQuery('diarios turma', query(collection(db, "diarios"), where("turma", "==", turmaId)));
                 }
+                if (turmaNomeReal && turmaNomeReal !== turmaId) {
+                    await tryQuery('diarios turma=nome', query(collection(db, "diarios"), where("turma", "==", turmaNomeReal)));
+                    await tryQuery('diarios turmaNome', query(collection(db, "diarios"), where("turmaNome", "==", turmaNomeReal)));
+                }
+
+                const hasAttendance = () => Array.from(diariosMap.values()).some(d => extractAttendanceFromDiary(d, studentKeys) !== null);
+
+                if (!hasAttendance()) {
+                    try {
+                        const all = await getDocs(collection(db, "diarios"));
+                        all.forEach(d => {
+                            const data = d.data();
+                            const sameTurma = (turmaId && (data.turmaId === turmaId || data.turma === turmaId)) ||
+                                (turmaNomeReal && (data.turmaNome === turmaNomeReal || data.turma === turmaNomeReal));
+                            if (sameTurma || extractAttendanceFromDiary(data, studentKeys) !== null) diariosMap.set(d.id, data);
+                        });
+                    } catch (err) {
+                        console.error("[Perfil Aluno - diarios (varredura)]", err?.code, err?.message, err);
+                    }
+                }
+
+                // Registos legados na coleção singular "diario" (se as regras permitirem)
+                try {
+                    const legacy = await getDocs(collection(db, "diario"));
+                    legacy.forEach(d => {
+                        const data = d.data();
+                        if (extractAttendanceFromDiary(data, studentKeys) !== null) diariosMap.set('legacy_' + d.id, data);
+                    });
+                } catch (err) {
+                    console.error("[Perfil Aluno - diario legado]", err?.code, err?.message);
+                }
+
+                let faltas = 0, presencas = 0;
+                diariosMap.forEach(docData => {
+                    const st = extractAttendanceFromDiary(docData, studentKeys);
+                    if (st === 'Falta') faltas++;
+                    else if (st === 'Presente') presencas++;
+                });
                 const totalAulas = faltas + presencas;
-                const taxa = totalAulas > 0 ? Math.round((presencas / totalAulas) * 100) + '%' : '100%';
                 setTxt('mdlAlunoFaltas', faltas);
                 setTxt('mdlAlunoPresencas', presencas);
-                setTxt('mdlAlunoFrequencia', totalAulas > 0 ? taxa : '--%');
+                setTxt('mdlAlunoFrequencia', totalAulas > 0 ? Math.round((presencas / totalAulas) * 100) + '%' : '--%');
             } catch (err) {
-                console.error("Erro ao calcular faltas do aluno:", err);
+                console.error("[Perfil Aluno - faltas]", err?.code, err?.message, err);
             }
 
-            // 3. Buscar Boletim Escolar
+            // 3. Boletim escolar (sem índices compostos)
             if (!tbody) return;
             try {
                 const notasDocs = new Map();
+                let attempts = 0, failures = 0, lastErr = null;
+                const run = async (label, q, filterFn) => {
+                    attempts++;
+                    try {
+                        const qs = await getDocs(q);
+                        qs.forEach(d => {
+                            const n = d.data();
+                            if (!filterFn || filterFn(n)) notasDocs.set(d.id, n);
+                        });
+                    } catch (err) {
+                        failures++;
+                        lastErr = err;
+                        console.error(`[Perfil Aluno - ${label}]`, err?.code, err?.message, err);
+                    }
+                };
+                const isStudent = n => idsToMatch.includes(n.alunoId) || idsToMatch.includes(n.alunoDocId) || idsToMatch.includes(n.uid);
+
                 for (const id of idsToMatch) {
-                    const qsN = await getDocs(query(collection(db, "notas"), where("alunoId", "==", id)));
-                    qsN.forEach(d => notasDocs.set(d.id, d.data()));
+                    await run('notas alunoId', query(collection(db, "notas"), where("alunoId", "==", id)));
+                }
+                if (notasDocs.size === 0 && turmaId) {
+                    await run('notas turmaId', query(collection(db, "notas"), where("turmaId", "==", turmaId)), isStudent);
+                    await run('notas turma', query(collection(db, "notas"), where("turma", "==", turmaId)), isStudent);
+                }
+                if (notasDocs.size === 0) {
+                    await run('notas (varredura)', collection(db, "notas"), isStudent);
                 }
 
                 if (notasDocs.size === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 1.25rem 1rem; color: #64748b;">Nenhuma nota registada.</td></tr>';
+                    if (attempts > 0 && failures === attempts) {
+                        tbody.innerHTML = `<tr><td colspan="6" style="padding: 1.25rem 1rem; text-align:center; color:#ef4444;">Erro ao carregar boletim (${esc(lastErr?.code || 'erro')}).</td></tr>`;
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 1.25rem 1rem; color: #64748b;">Nenhuma nota registada.</td></tr>';
+                    }
                     return;
                 }
 
                 const disciplinasNotas = {};
                 notasDocs.forEach(n => {
-                    if (!disciplinasNotas[n.disciplina]) disciplinasNotas[n.disciplina] = {};
-                    disciplinasNotas[n.disciplina][n.bimestre] = n.nota;
+                    const disc = n.disciplina || '-';
+                    if (!disciplinasNotas[disc]) disciplinasNotas[disc] = {};
+                    disciplinasNotas[disc][normalizeBimestre(n.bimestre)] = n.nota;
                 });
 
                 tbody.innerHTML = '';
                 for (const [disc, bimestres] of Object.entries(disciplinasNotas)) {
-                    const b1 = bimestres['1º Bimestre'] !== undefined ? bimestres['1º Bimestre'] : '-';
-                    const b2 = bimestres['2º Bimestre'] !== undefined ? bimestres['2º Bimestre'] : '-';
-                    const b3 = bimestres['3º Bimestre'] !== undefined ? bimestres['3º Bimestre'] : '-';
-                    const b4 = bimestres['4º Bimestre'] !== undefined ? bimestres['4º Bimestre'] : '-';
-
+                    const vals = ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre']
+                        .map(b => bimestres[b] !== undefined ? bimestres[b] : '-');
                     let count = 0, sum = 0;
-                    [b1, b2, b3, b4].forEach(val => {
-                        if (val !== '-' && !isNaN(parseFloat(val))) {
-                            sum += parseFloat(val);
-                            count++;
-                        }
+                    vals.forEach(val => {
+                        if (val !== '-' && !isNaN(parseFloat(val))) { sum += parseFloat(val); count++; }
                     });
-
                     const media = count > 0 ? (sum / count).toFixed(1) : '-';
                     const mediaColor = media !== '-' ? (parseFloat(media) >= 6 ? '#16a34a' : '#dc2626') : 'inherit';
 
                     tbody.innerHTML += `
                         <tr>
                             <td><strong>${esc(disc)}</strong></td>
-                            <td style="text-align: center;">${esc(b1)}</td>
-                            <td style="text-align: center;">${esc(b2)}</td>
-                            <td style="text-align: center;">${esc(b3)}</td>
-                            <td style="text-align: center;">${esc(b4)}</td>
+                            ${vals.map(v => `<td style="text-align: center;">${esc(v)}</td>`).join('')}
                             <td style="text-align: center; font-weight: bold; color: ${mediaColor};">${esc(media)}</td>
                         </tr>
                     `;
                 }
             } catch (error) {
-                console.error("Erro ao carregar boletim:", error);
-                tbody.innerHTML = '<tr><td colspan="6" style="padding: 1.25rem 1rem; text-align:center; color:#ef4444;">Erro ao carregar boletim.</td></tr>';
+                console.error("[Perfil Aluno - boletim]", error?.code, error?.message, error);
+                tbody.innerHTML = `<tr><td colspan="6" style="padding: 1.25rem 1rem; text-align:center; color:#ef4444;">Erro ao carregar boletim (${esc(error?.code || 'erro')}).</td></tr>`;
             }
         }
 
