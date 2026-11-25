@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Aluno | Colégio Veras</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css?v=20261124">
+    <link rel="stylesheet" href="css/styles.css?v=20261125">
 </head>
 
 <body>
@@ -251,77 +251,129 @@
         </div>
     </div>
 
+    <!-- Boot síncrono de UI (independente do SDK do Firebase / rede) -->
+    <script>
+        (function () {
+            window.__verasModuleReady = false;
+            window.addEventListener('error', (ev) => {
+                console.error('[Erro Global - Aluno]', ev.message, ev.filename, ev.lineno, ev.error);
+            });
+            window.addEventListener('unhandledrejection', (ev) => {
+                console.error('[Promise Não Tratada - Aluno]', ev.reason);
+            });
+
+            window.fecharModalAtividade = function () {
+                const modal = document.getElementById('atividadeModalAluno');
+                if (modal) modal.classList.remove('active');
+            };
+
+            window.fecharModalAviso = function () {
+                const modal = document.getElementById('avisoModalAluno');
+                if (modal) modal.classList.remove('active');
+            };
+
+            document.getElementById('closeAtividadeModalBtn')?.addEventListener('click', window.fecharModalAtividade);
+            document.getElementById('fecharAtividadeModalFooterBtn')?.addEventListener('click', window.fecharModalAtividade);
+            document.getElementById('atividadeModalAluno')?.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) window.fecharModalAtividade();
+            });
+
+            document.getElementById('closeAvisoModalBtn')?.addEventListener('click', window.fecharModalAviso);
+            document.getElementById('fecharAvisoModalFooterBtn')?.addEventListener('click', window.fecharModalAviso);
+            document.getElementById('avisoModalAluno')?.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) window.fecharModalAviso();
+            });
+
+            const sidebarEl = document.getElementById('sidebar');
+            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+            function setSidebarOpen(open) {
+                if (!sidebarEl || !sidebarBackdrop) return;
+                sidebarEl.classList.toggle('open', open);
+                sidebarBackdrop.classList.toggle('active', open);
+            }
+            window.__setSidebarOpen = setSidebarOpen;
+
+            document.getElementById('mobileMenuBtn')?.addEventListener('click', () => setSidebarOpen(true));
+            document.getElementById('sidebarCloseBtn')?.addEventListener('click', () => setSidebarOpen(false));
+            sidebarBackdrop?.addEventListener('click', () => setSidebarOpen(false));
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    window.fecharModalAtividade();
+                    window.fecharModalAviso();
+                    setSidebarOpen(false);
+                }
+            });
+
+            document.querySelectorAll('.tab-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = e.currentTarget.getAttribute('data-tab');
+                    if (!targetId) return;
+                    const targetEl = document.getElementById(targetId);
+                    if (!targetEl) return;
+
+                    document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    targetEl.classList.add('active');
+                    setSidebarOpen(false);
+                });
+            });
+
+            document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!window.__verasModuleReady) {
+                    window.location.href = 'portais.html';
+                }
+            });
+        })();
+    </script>
+
     <script type="module">
-        import { auth, db } from './js/firebase-config.js';
-        import { esc, extractAttendanceFromDiary, normalizeBimestre } from './js/auth-utils.js';
+        import { auth, db } from './js/firebase-config.js?v=20261125';
+        import { esc, extractAttendanceFromDiary, normalizeBimestre } from './js/auth-utils.js?v=20261125';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
-        // --- FUNÇÕES GLOBAIS DE MODAIS ---
-        window.fecharModalAtividade = function () {
-            const modal = document.getElementById('atividadeModalAluno');
-            if (modal) modal.classList.remove('active');
-        };
+        window.__verasModuleReady = true;
+        let alunoBootResolved = false;
 
-        window.fecharModalAviso = function () {
-            const modal = document.getElementById('avisoModalAluno');
-            if (modal) modal.classList.remove('active');
-        };
+        function setAlunoBootFallback(msg) {
+            const elName = document.getElementById('studentName');
+            const elInfo = document.getElementById('studentInfoName');
+            const elTurma = document.getElementById('turmaInfo');
+            if (elName && elName.innerText.includes('A carregar')) elName.innerText = 'Aluno';
+            if (elInfo && elInfo.innerText.trim() === '...') elInfo.innerText = 'Aluno';
+            if (elTurma && elTurma.innerText.includes('...')) elTurma.innerText = 'Turma: --';
 
-        document.getElementById('closeAtividadeModalBtn')?.addEventListener('click', window.fecharModalAtividade);
-        document.getElementById('fecharAtividadeModalFooterBtn')?.addEventListener('click', window.fecharModalAtividade);
-        document.getElementById('atividadeModalAluno')?.addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) window.fecharModalAtividade();
-        });
-
-        document.getElementById('closeAvisoModalBtn')?.addEventListener('click', window.fecharModalAviso);
-        document.getElementById('fecharAvisoModalFooterBtn')?.addEventListener('click', window.fecharModalAviso);
-        document.getElementById('avisoModalAluno')?.addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) window.fecharModalAviso();
-        });
-
-        // --- MOBILE SIDEBAR ---
-        const sidebarEl = document.getElementById('sidebar');
-        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-
-        function setSidebarOpen(open) {
-            if (!sidebarEl || !sidebarBackdrop) return;
-            sidebarEl.classList.toggle('open', open);
-            sidebarBackdrop.classList.toggle('active', open);
+            const mural = document.getElementById('muralAvisosAluno');
+            if (mural && mural.textContent.includes('A carregar')) {
+                mural.innerHTML = `<p style="color: #ef4444;">${esc(msg || 'Não foi possível carregar os avisos.')}</p>`;
+            }
+            const tbody = document.getElementById('boletimNotasTable');
+            if (tbody && tbody.textContent.includes('A carregar')) {
+                tbody.innerHTML = `<tr><td colspan="3" style="padding:1.5rem; text-align:center; color:#ef4444;">${esc(msg || 'Erro ao carregar o boletim.')}</td></tr>`;
+            }
+            const sel = document.getElementById('atividadesDisciplinaSelectAluno');
+            if (sel && sel.options.length === 1 && sel.options[0].textContent.includes('A carregar')) {
+                sel.innerHTML = '<option value="">Erro ao carregar atividades</option>';
+            }
         }
 
-        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => setSidebarOpen(true));
-        document.getElementById('sidebarCloseBtn')?.addEventListener('click', () => setSidebarOpen(false));
-        sidebarBackdrop?.addEventListener('click', () => setSidebarOpen(false));
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                window.fecharModalAtividade();
-                window.fecharModalAviso();
-                setSidebarOpen(false);
+        setTimeout(() => {
+            if (!alunoBootResolved) {
+                console.error("[Painel Aluno] Tempo limite ao aguardar autenticação do Firebase.");
+                setAlunoBootFallback("Tempo limite excedido ao carregar dados. Recarregue a página.");
             }
-        });
-
-        // --- TAB NAVIGATION ---
-        document.querySelectorAll('.tab-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = e.currentTarget.getAttribute('data-tab');
-                if (!targetId) return;
-                const targetEl = document.getElementById(targetId);
-                if (!targetEl) return;
-
-                document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                targetEl.classList.add('active');
-                setSidebarOpen(false);
-            });
-        });
+        }, 15000);
 
         document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
             e.preventDefault();
-            signOut(auth).then(() => window.location.href = 'portais.html');
+            signOut(auth).catch(err => console.error("[Logout Aluno]", err?.code, err?.message)).finally(() => {
+                window.location.href = 'portais.html';
+            });
         });
 
         function formatDateValue(val) {
@@ -372,6 +424,7 @@
 
         // --- AUTH & CARREGAMENTO DE DADOS ---
         onAuthStateChanged(auth, async (user) => {
+            alunoBootResolved = true;
             if (!user) { window.location.href = 'portais.html'; return; }
 
             try {
@@ -407,7 +460,7 @@
                 }
 
                 const studentUid = userData.uid || user.uid || userDocId;
-                const studentName = userData.name || (user.email ? user.email.split('@')[0] : 'Aluno');
+                const studentName = userData.name || userData.nome || user.email || 'Aluno';
 
                 const elStudentName = document.getElementById('studentName');
                 const elStudentInfoName = document.getElementById('studentInfoName');
@@ -418,7 +471,7 @@
 
                 window.targetStudentUid = studentUid;
                 window.targetStudentDocId = userDocId;
-                window.targetStudentKeys = [studentUid, userDocId, userData.matricula, userData.name].filter(Boolean);
+                window.targetStudentKeys = [studentUid, userDocId, userData.matricula, userData.name, userData.nome].filter(Boolean);
 
                 const rawTurma = userData.turmaId || userData.turma || '';
                 const { turmaId, turmaNome } = await resolveTurma(rawTurma);
@@ -447,14 +500,23 @@
                     if (dc) dc.innerText = "0/0";
                     const ds = document.getElementById('dashAtivSala');
                     if (ds) ds.innerText = "0/0";
+                    const selDisc = document.getElementById('atividadesDisciplinaSelectAluno');
+                    if (selDisc) selDisc.innerHTML = '<option value="">Nenhuma atividade atribuída até ao momento</option>';
                     await Promise.all([
                         loadBoletim(studentUid, userDocId),
                         loadAvisosAluno('', '')
                     ]);
                 }
             } catch (err) {
-                console.error("Erro ao inicializar painel do aluno:", err);
+                console.error("[Painel Aluno - init]", err?.code, err?.message, err);
+                setAlunoBootFallback("Erro ao carregar os seus dados (" + (err?.code || 'erro') + ").");
+            } finally {
+                setAlunoBootFallback("Não foi possível carregar alguns dados.");
             }
+        }, (authErr) => {
+            alunoBootResolved = true;
+            console.error("[Painel Aluno - Auth Error]", authErr?.code, authErr?.message, authErr);
+            setAlunoBootFallback("Erro de autenticação (" + (authErr?.code || 'erro') + ").");
         });
 
         // --- LÓGICA DO HORÁRIO ---
@@ -682,7 +744,13 @@
                         : '<option value="">Nenhuma atividade atribuída até ao momento</option>';
                 }
             } catch (error) {
-                console.error("Erro ao carregar atividades:", error);
+                console.error("Erro ao carregar atividades:", error?.code, error?.message, error);
+                const dCasa = document.getElementById('dashAtivCasa');
+                if (dCasa) dCasa.innerText = '--/--';
+                const dSala = document.getElementById('dashAtivSala');
+                if (dSala) dSala.innerText = '--/--';
+                const selectDisc = document.getElementById('atividadesDisciplinaSelectAluno');
+                if (selectDisc) selectDisc.innerHTML = '<option value="">Erro ao carregar atividades</option>';
             }
         }
 

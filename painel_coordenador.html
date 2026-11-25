@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Coordenador | Colégio Veras</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css?v=20261124">
+    <link rel="stylesheet" href="css/styles.css?v=20261125">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -717,11 +717,124 @@
         </div>
     </div>
 
+    <!-- Boot síncrono de UI (independente do SDK do Firebase / rede) -->
+    <script>
+        (function () {
+            window.__verasModuleReady = false;
+            window.addEventListener('error', (ev) => {
+                console.error('[Erro Global - Coordenador]', ev.message, ev.filename, ev.lineno, ev.error);
+            });
+            window.addEventListener('unhandledrejection', (ev) => {
+                console.error('[Promise Não Tratada - Coordenador]', ev.reason);
+            });
+
+            const sidebarEl = document.getElementById('sidebar');
+            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+            function setSidebarOpen(open) {
+                if (!sidebarEl || !sidebarBackdrop) return;
+                sidebarEl.classList.toggle('open', open);
+                sidebarBackdrop.classList.toggle('active', open);
+            }
+            window.__setSidebarOpen = setSidebarOpen;
+
+            document.getElementById('mobileMenuBtn')?.addEventListener('click', () => setSidebarOpen(true));
+            document.getElementById('sidebarCloseBtn')?.addEventListener('click', () => setSidebarOpen(false));
+            sidebarBackdrop?.addEventListener('click', () => setSidebarOpen(false));
+
+            function closeAllCoordModals() {
+                ['horarioModal', 'userModal', 'alunoPerfilModal', 'diarioDetalheModal', 'avisoDetalheModal'].forEach(id => {
+                    document.getElementById(id)?.classList.remove('active');
+                });
+            }
+            window.__closeAllCoordModals = closeAllCoordModals;
+
+            function bindModalDismiss(modalId, closeBtnIds) {
+                const modal = document.getElementById(modalId);
+                if (!modal) return;
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.classList.remove('active');
+                });
+                closeBtnIds.forEach(btnId => {
+                    document.getElementById(btnId)?.addEventListener('click', () => modal.classList.remove('active'));
+                });
+            }
+
+            bindModalDismiss('horarioModal', ['closeModal']);
+            bindModalDismiss('userModal', ['closeUserModal', 'cancelUserModalBtn']);
+            bindModalDismiss('alunoPerfilModal', ['closeAlunoPerfilModal', 'fecharAlunoPerfilBtn']);
+            bindModalDismiss('diarioDetalheModal', ['closeDiarioModal']);
+            bindModalDismiss('avisoDetalheModal', ['closeAvisoDetalheModal', 'fecharAvisoDetalheBtn']);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeAllCoordModals();
+                    setSidebarOpen(false);
+                }
+            });
+
+            document.querySelectorAll('.tab-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabId = e.currentTarget.getAttribute('data-tab');
+                    if (!tabId) return;
+                    const targetEl = document.getElementById(tabId);
+                    if (!targetEl) return;
+
+                    document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    targetEl.classList.add('active');
+                    setSidebarOpen(false);
+
+                    window.dispatchEvent(new CustomEvent('veras:tabchange', { detail: { tabId } }));
+                });
+            });
+
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.sub-tab-btn').forEach(b => {
+                        b.classList.remove('active');
+                        b.style.color = '#64748b';
+                        b.style.borderBottom = 'none';
+                    });
+
+                    e.currentTarget.classList.add('active');
+                    e.currentTarget.style.color = 'var(--primary-color)';
+                    e.currentTarget.style.borderBottom = '3px solid var(--primary-color)';
+
+                    document.querySelectorAll('.sub-tab-content').forEach(c => {
+                        c.classList.remove('active');
+                        c.style.display = 'none';
+                    });
+
+                    const targetId = e.currentTarget.getAttribute('data-subtab');
+                    const targetEl = document.getElementById(targetId);
+                    if (targetEl) {
+                        targetEl.classList.add('active');
+                        targetEl.style.display = 'block';
+                    }
+
+                    window.dispatchEvent(new CustomEvent('veras:subtabchange', { detail: { subTabId: targetId } }));
+                });
+            });
+
+            document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!window.__verasModuleReady) {
+                    window.location.href = 'portais.html';
+                }
+            });
+        })();
+    </script>
+
     <script type="module">
-        import { auth, secondaryAuth, db } from './js/firebase-config.js';
-        import { esc, parseDisciplinas, horasDoTurno, extractAttendanceFromDiary, normalizeBimestre } from './js/auth-utils.js';
+        import { auth, getOrInitSecondaryAuth, db } from './js/firebase-config.js?v=20261125';
+        import { esc, parseDisciplinas, horasDoTurno, extractAttendanceFromDiary, normalizeBimestre } from './js/auth-utils.js?v=20261125';
         import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
         import { collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, serverTimestamp, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        window.__verasModuleReady = true;
 
         const ALLOWED_CREATE_ROLES = ['aluno', 'professor', 'pais'];
         let currentAdminUid = '';
@@ -734,6 +847,53 @@
         let avisosCacheList = [];
         let rolesChartInstance = null;
         let turnoChartInstance = null;
+        let coordBootResolved = false;
+
+        function setCoordBootFallback(msg) {
+            ['dashTotalAlunos', 'dashTotalProfessores', 'dashTotalTurmas', 'dashAlertasCriticos'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.innerText.trim() === '...') el.innerText = '--';
+            });
+            const alertList = document.getElementById('dashAlertList');
+            if (alertList && alertList.textContent.includes('A carregar dados')) {
+                alertList.innerHTML = `
+                    <li class="alert-item">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i>
+                        <div class="content">
+                            <h5>Falha ao carregar painel</h5>
+                            <p>${esc(msg || 'Não foi possível ligar ao Firestore. Verifique a sua sessão e recarregue a página.')}</p>
+                        </div>
+                    </li>
+                `;
+            }
+        }
+
+        function translateFirebaseAuthError(err) {
+            const code = err?.code || '';
+            switch (code) {
+                case 'auth/email-already-in-use':
+                    return "Este e-mail (ou matrícula) já está cadastrado numa conta ativa no sistema.";
+                case 'auth/weak-password':
+                    return "A senha informada é muito fraca. Utilize pelo menos 6 caracteres.";
+                case 'auth/invalid-email':
+                    return "O endereço de e-mail informado é inválido.";
+                case 'auth/operation-not-allowed':
+                    return "Autenticação por E-mail/Senha não está ativa no Firebase Console.";
+                case 'auth/network-request-failed':
+                    return "Falha de ligação ao Firebase. Verifique a sua internet e tente novamente.";
+                case 'auth/too-many-requests':
+                    return "Demasiadas tentativas seguidas. Aguarde alguns instantes e tente novamente.";
+                default:
+                    return "Erro ao criar credencial: " + (code ? code + " - " : "") + (err?.message || err);
+            }
+        }
+
+        setTimeout(() => {
+            if (!coordBootResolved) {
+                console.error("[Painel Coordenador] Tempo limite ao aguardar autenticação do Firebase.");
+                setCoordBootFallback("Tempo limite excedido ao validar a sessão. Recarregue a página ou faça login novamente.");
+            }
+        }, 15000);
 
         function formatDateValue(val) {
             if (!val) return "N/A";
@@ -756,78 +916,21 @@
             }
         }
 
-        // --- MOBILE SIDEBAR ---
-        const sidebarEl = document.getElementById('sidebar');
-        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-
-        function setSidebarOpen(open) {
-            if (!sidebarEl || !sidebarBackdrop) return;
-            sidebarEl.classList.toggle('open', open);
-            sidebarBackdrop.classList.toggle('active', open);
-        }
-
-        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => setSidebarOpen(true));
-        document.getElementById('sidebarCloseBtn')?.addEventListener('click', () => setSidebarOpen(false));
-        sidebarBackdrop?.addEventListener('click', () => setSidebarOpen(false));
-
-        // --- MODAL CLOSING HELPERS ---
-        function closeAllCoordModals() {
-            ['horarioModal', 'userModal', 'alunoPerfilModal', 'diarioDetalheModal', 'avisoDetalheModal'].forEach(id => {
-                document.getElementById(id)?.classList.remove('active');
-            });
-        }
-
-        function bindModalDismiss(modalId, closeBtnIds) {
-            const modal = document.getElementById(modalId);
-            if (!modal) return;
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) modal.classList.remove('active');
-            });
-            closeBtnIds.forEach(btnId => {
-                document.getElementById(btnId)?.addEventListener('click', () => modal.classList.remove('active'));
-            });
-        }
-
-        bindModalDismiss('horarioModal', ['closeModal']);
-        bindModalDismiss('userModal', ['closeUserModal', 'cancelUserModalBtn']);
-        bindModalDismiss('alunoPerfilModal', ['closeAlunoPerfilModal', 'fecharAlunoPerfilBtn']);
-        bindModalDismiss('diarioDetalheModal', ['closeDiarioModal']);
-        bindModalDismiss('avisoDetalheModal', ['closeAvisoDetalheModal', 'fecharAvisoDetalheBtn']);
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeAllCoordModals();
-                setSidebarOpen(false);
+        // --- TAB REFETCH ON UI SWITCH (UI já comutada no boot síncrono) ---
+        window.addEventListener('veras:tabchange', (e) => {
+            const tabId = e?.detail?.tabId;
+            if (tabId === 'tab-horarios') loadTurmasToSelect();
+            if (tabId === 'tab-usuarios') refreshUsersTab();
+            if (tabId === 'tab-relatorios') refreshRelatoriosHub();
+            if (tabId === 'tab-avisos') {
+                loadTurmasToAvisoSelect();
+                loadAvisosCoordenador();
             }
-        });
-
-        // --- TAB NAVIGATION ---
-        document.querySelectorAll('.tab-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const tabId = e.currentTarget.getAttribute('data-tab');
-                if (!tabId) return;
-                const targetEl = document.getElementById(tabId);
-                if (!targetEl) return;
-
-                document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                targetEl.classList.add('active');
-                setSidebarOpen(false);
-
-                if (tabId === 'tab-horarios') loadTurmasToSelect();
-                if (tabId === 'tab-usuarios') refreshUsersTab();
-                if (tabId === 'tab-relatorios') refreshRelatoriosHub();
-                if (tabId === 'tab-avisos') {
-                    loadTurmasToAvisoSelect();
-                    loadAvisosCoordenador();
-                }
-            });
         });
 
         // --- ROUTE GUARD (BYPASS COORDENADOR) ---
         onAuthStateChanged(auth, async (user) => {
+            coordBootResolved = true;
             if (!user) { window.location.href = 'portais.html'; return; }
             try {
                 let userData = null;
@@ -852,7 +955,7 @@
                 }
 
                 currentAdminUid = user.uid;
-                currentAdminName = userData.name || (user.email ? user.email.split('@')[0] : 'Coordenador');
+                currentAdminName = userData.name || userData.nome || user.email || 'Coordenador';
                 const adminNameEl = document.getElementById('adminName');
                 if (adminNameEl) adminNameEl.innerText = currentAdminName;
 
@@ -869,13 +972,25 @@
                 ]);
                 renderChecklistAlunos('listaChecklistAlunos', 'paisVinculosCount', 'searchAluno', []);
             } catch (err) {
-                console.error("Erro na inicialização do painel do coordenador:", err);
+                console.error("[Painel Coordenador - init]", err?.code, err?.message, err);
+                setCoordBootFallback("Erro ao inicializar o painel (" + (err?.code || err?.message || 'erro') + ").");
+            } finally {
+                ['dashTotalAlunos', 'dashTotalProfessores', 'dashTotalTurmas', 'dashAlertasCriticos'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.innerText.trim() === '...') el.innerText = '--';
+                });
             }
+        }, (authErr) => {
+            coordBootResolved = true;
+            console.error("[Painel Coordenador - Auth Error]", authErr?.code, authErr?.message, authErr);
+            setCoordBootFallback("Erro na verificação de autenticação (" + (authErr?.code || 'erro') + ").");
         });
 
         document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
             e.preventDefault();
-            signOut(auth).then(() => window.location.href = 'portais.html');
+            signOut(auth).catch(err => console.error("[Logout Coordenador]", err?.code, err?.message)).finally(() => {
+                window.location.href = 'portais.html';
+            });
         });
 
         // --- CACHES COMPARTILHADOS ---
@@ -1061,66 +1176,67 @@
             createUserForm.addEventListener('submit', async function (e) {
                 e.preventDefault();
                 const btn = this.querySelector('button[type="submit"]');
-                const tipoUtilizador = document.getElementById('userRole')?.value;
-
-                // Blindagem estrita: NUNCA criar coordenador pela UI
-                if (!ALLOWED_CREATE_ROLES.includes(tipoUtilizador)) {
-                    alert("Tipo de utilizador inválido.");
-                    return;
-                }
-
-                const name = document.getElementById('userName')?.value.trim();
-                let finalEmail = document.getElementById('userId')?.value.trim();
-                const password = document.getElementById('userPassword')?.value;
-
-                if (!name || !finalEmail || !password) {
-                    alert("Preencha todos os campos obrigatórios.");
-                    return;
-                }
-
-                let selectedAlunoUids = [];
-                if (tipoUtilizador === 'pais') {
-                    selectedAlunoUids = Array.from(
-                        document.querySelectorAll('#listaChecklistAlunos input[type="checkbox"]:checked')
-                    ).map(cb => cb.value).filter(Boolean);
-
-                    if (!selectedAlunoUids.length) {
-                        alert("Selecione pelo menos um aluno para vincular à conta de Pais/Responsável.");
-                        return;
-                    }
-                }
-
-                let matricula = null;
-                if (tipoUtilizador === 'aluno') {
-                    matricula = finalEmail;
-                    finalEmail = `${matricula}@aluno.escola.com`;
-                    const tel = document.getElementById('userTelefone')?.value.trim();
-                    const end = document.getElementById('userEndereco')?.value.trim();
-                    if (!tel || !end) {
-                        alert("Para contas de aluno, telefone e endereço são obrigatórios.");
-                        return;
-                    }
-                }
-
-                if (!auth.currentUser) {
-                    alert("Sessão do Coordenador inválida. Faça login novamente.");
-                    return;
-                }
-
-                if (btn) { btn.disabled = true; btn.innerText = "A criar..."; }
-
-                let newUid = "";
                 try {
+                    const tipoUtilizador = document.getElementById('userRole')?.value;
+
+                    // Blindagem estrita: NUNCA criar coordenador pela UI
+                    if (!ALLOWED_CREATE_ROLES.includes(tipoUtilizador)) {
+                        alert("Tipo de utilizador inválido.");
+                        return;
+                    }
+
+                    const name = document.getElementById('userName')?.value.trim();
+                    let finalEmail = document.getElementById('userId')?.value.trim();
+                    const password = document.getElementById('userPassword')?.value;
+
+                    if (!name || !finalEmail || !password) {
+                        alert("Preencha todos os campos obrigatórios.");
+                        return;
+                    }
+
+                    let selectedAlunoUids = [];
+                    if (tipoUtilizador === 'pais') {
+                        selectedAlunoUids = Array.from(
+                            document.querySelectorAll('#listaChecklistAlunos input[type="checkbox"]:checked')
+                        ).map(cb => cb.value).filter(Boolean);
+
+                        if (!selectedAlunoUids.length) {
+                            alert("Selecione pelo menos um aluno para vincular à conta de Pais/Responsável.");
+                            return;
+                        }
+                    }
+
+                    let matricula = null;
+                    if (tipoUtilizador === 'aluno') {
+                        matricula = finalEmail;
+                        finalEmail = `${matricula}@aluno.escola.com`;
+                        const tel = document.getElementById('userTelefone')?.value.trim();
+                        const end = document.getElementById('userEndereco')?.value.trim();
+                        if (!tel || !end) {
+                            alert("Para contas de aluno, telefone e endereço são obrigatórios.");
+                            return;
+                        }
+                    }
+
+                    if (!auth.currentUser) {
+                        alert("Sessão do Coordenador inválida. Faça login novamente.");
+                        return;
+                    }
+
+                    if (btn) { btn.disabled = true; btn.innerText = "A criar..."; }
+
+                    let newUid = "";
+                    const secAuth = getOrInitSecondaryAuth();
                     // 1) Conta no Firebase Auth via app SECUNDÁRIO (não desloga o Coordenador)
                     try {
-                        const userCredential = await createUserWithEmailAndPassword(secondaryAuth, finalEmail, password);
+                        const userCredential = await createUserWithEmailAndPassword(secAuth, finalEmail, password);
                         newUid = userCredential.user.uid;
                     } catch (authErr) {
                         console.error("[Criar Utilizador - secondaryAuth]", authErr?.code, authErr?.message, authErr);
                         if (authErr?.code === 'auth/email-already-in-use') {
                             // Conta órfã (criada antes, mas sem documento em users): tenta recuperar
                             try {
-                                const retryCred = await signInWithEmailAndPassword(secondaryAuth, finalEmail, password);
+                                const retryCred = await signInWithEmailAndPassword(secAuth, finalEmail, password);
                                 const candidateUid = retryCred.user.uid;
                                 const existingDoc = await getDoc(doc(db, "users", candidateUid));
                                 if (existingDoc.exists()) throw authErr;
@@ -1133,7 +1249,7 @@
                             throw authErr;
                         }
                     } finally {
-                        try { await signOut(secondaryAuth); } catch (soErr) {
+                        try { await signOut(secAuth); } catch (soErr) {
                             console.error("[signOut secondaryAuth]", soErr?.code, soErr?.message);
                         }
                     }
@@ -1197,11 +1313,15 @@
                     const searchInp = document.getElementById('searchAluno');
                     if (searchInp) searchInp.value = '';
                     applyRoleFormVisibility();
-                    await refreshUsersTab();
-                    await loadDashboardStats();
+                    try {
+                        await refreshUsersTab();
+                        await loadDashboardStats();
+                    } catch (refreshErr) {
+                        console.error("[Criar Utilizador - atualização pós-criação]", refreshErr?.code, refreshErr?.message, refreshErr);
+                    }
                 } catch (error) {
                     console.error("[Criar Utilizador]", error?.code, error?.message, error);
-                    alert("Erro ao criar credencial: " + (error?.code ? error.code + " - " : "") + (error?.message || error));
+                    alert(translateFirebaseAuthError(error));
                 } finally {
                     if (btn) { btn.disabled = false; btn.innerText = "Gerar Credencial"; }
                 }
@@ -1660,27 +1780,49 @@
         });
 
         // --- DASHBOARD STATS & CHARTS ---
-        async function loadDashboardStats() {
+        async function safeDashboardQuery(label, ref) {
             try {
-                const [snapAlunos, snapProfs, snapPais, snapTurmas, snapHorarios] = await Promise.all([
-                    getDocs(query(collection(db, "users"), where("role", "==", "aluno"))),
-                    getDocs(query(collection(db, "users"), where("role", "==", "professor"))),
-                    getDocs(query(collection(db, "users"), where("role", "==", "pais"))),
-                    getDocs(collection(db, "turmas")),
-                    getDocs(collection(db, "horarios"))
+                return { ok: true, snap: await getDocs(ref) };
+            } catch (err) {
+                console.error(`[Dashboard - ${label}]`, err?.code, err?.message, err);
+                return { ok: false, snap: { size: 0, forEach: () => {} }, err };
+            }
+        }
+
+        async function loadDashboardStats() {
+            const elAl = document.getElementById('dashTotalAlunos');
+            const elPr = document.getElementById('dashTotalProfessores');
+            const elTu = document.getElementById('dashTotalTurmas');
+            const elCrit = document.getElementById('dashAlertasCriticos');
+            const alertList = document.getElementById('dashAlertList');
+
+            try {
+                const [rAlunos, rProfs, rPais, rTurmas, rHorarios] = await Promise.all([
+                    safeDashboardQuery('alunos', query(collection(db, "users"), where("role", "==", "aluno"))),
+                    safeDashboardQuery('professores', query(collection(db, "users"), where("role", "==", "professor"))),
+                    safeDashboardQuery('pais', query(collection(db, "users"), where("role", "==", "pais"))),
+                    safeDashboardQuery('turmas', collection(db, "turmas")),
+                    safeDashboardQuery('horarios', collection(db, "horarios"))
                 ]);
+
+                if (!rAlunos.ok && !rProfs.ok && !rPais.ok && !rTurmas.ok && !rHorarios.ok) {
+                    throw (rAlunos.err || new Error("Falha total ao ler coleções do Dashboard."));
+                }
+
+                const snapAlunos = rAlunos.snap;
+                const snapProfs = rProfs.snap;
+                const snapPais = rPais.snap;
+                const snapTurmas = rTurmas.snap;
+                const snapHorarios = rHorarios.snap;
 
                 const totalAlunos = snapAlunos.size;
                 const totalProfs = snapProfs.size;
                 const totalPais = snapPais.size;
                 const totalTurmas = snapTurmas.size;
 
-                const elAl = document.getElementById('dashTotalAlunos');
-                const elPr = document.getElementById('dashTotalProfessores');
-                const elTu = document.getElementById('dashTotalTurmas');
-                if (elAl) elAl.innerText = totalAlunos;
-                if (elPr) elPr.innerText = totalProfs;
-                if (elTu) elTu.innerText = totalTurmas;
+                if (elAl) elAl.innerText = rAlunos.ok ? totalAlunos : '--';
+                if (elPr) elPr.innerText = rProfs.ok ? totalProfs : '--';
+                if (elTu) elTu.innerText = rTurmas.ok ? totalTurmas : '--';
 
                 const alunosPorTurmaCount = {};
                 snapAlunos.forEach(d => {
@@ -1694,7 +1836,6 @@
                     if (tId) horariosPorTurmaCount[tId] = (horariosPorTurmaCount[tId] || 0) + 1;
                 });
 
-                const alertList = document.getElementById('dashAlertList');
                 let alertasCriticosCount = 0;
                 let alertsHtml = '';
                 const turnoCounts = {};
@@ -1746,13 +1887,14 @@
                     `;
                 }
 
-                const elCrit = document.getElementById('dashAlertasCriticos');
-                if (elCrit) elCrit.innerText = alertasCriticosCount;
+                if (elCrit) elCrit.innerText = rTurmas.ok ? alertasCriticosCount : '--';
 
-                // Gráficos Chart.js
+                // Gráficos Chart.js (destrói instância prévia pelo canvas ou referência)
                 const rolesCanvas = document.getElementById('userRolesChart');
                 if (rolesCanvas && typeof Chart !== 'undefined') {
-                    if (rolesChartInstance) rolesChartInstance.destroy();
+                    const existingRoles = typeof Chart.getChart === 'function' ? Chart.getChart(rolesCanvas) : null;
+                    if (existingRoles) existingRoles.destroy();
+                    else if (rolesChartInstance) rolesChartInstance.destroy();
                     rolesChartInstance = new Chart(rolesCanvas.getContext('2d'), {
                         type: 'doughnut',
                         data: {
@@ -1775,14 +1917,18 @@
 
                 const turnoCanvas = document.getElementById('alunosPorTurnoChart');
                 if (turnoCanvas && typeof Chart !== 'undefined') {
-                    if (turnoChartInstance) turnoChartInstance.destroy();
+                    const existingTurno = typeof Chart.getChart === 'function' ? Chart.getChart(turnoCanvas) : null;
+                    if (existingTurno) existingTurno.destroy();
+                    else if (turnoChartInstance) turnoChartInstance.destroy();
+                    const turnoLabels = Object.keys(turnoCounts);
+                    const turnoValues = Object.values(turnoCounts);
                     turnoChartInstance = new Chart(turnoCanvas.getContext('2d'), {
                         type: 'bar',
                         data: {
-                            labels: Object.keys(turnoCounts),
+                            labels: turnoLabels.length ? turnoLabels : ['Sem turmas'],
                             datasets: [{
                                 label: 'Qtd de Alunos',
-                                data: Object.values(turnoCounts),
+                                data: turnoValues.length ? turnoValues : [0],
                                 backgroundColor: 'rgba(13, 43, 86, 0.85)',
                                 borderRadius: 6,
                                 barPercentage: 0.6
@@ -1800,19 +1946,22 @@
                     });
                 }
             } catch (error) {
-                console.error("Erro ao carregar dashboard:", error);
-                const alertList = document.getElementById('dashAlertList');
+                console.error("[Dashboard - erro geral]", error?.code, error?.message, error);
                 if (alertList) {
                     alertList.innerHTML = `
                         <li class="alert-item">
                             <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i>
                             <div class="content">
                                 <h5>Erro de Carregamento</h5>
-                                <p>Falha ao conectar à base de dados. Recarregue a página.</p>
+                                <p>Falha ao conectar à base de dados (${esc(error?.code || 'erro')}). Recarregue a página.</p>
                             </div>
                         </li>
                     `;
                 }
+            } finally {
+                [elAl, elPr, elTu, elCrit].forEach(el => {
+                    if (el && el.innerText.trim() === '...') el.innerText = '--';
+                });
             }
         }
 
@@ -1824,34 +1973,11 @@
             else await loadTurmasExistentes();
         }
 
-        document.querySelectorAll('.sub-tab-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.sub-tab-btn').forEach(b => {
-                    b.classList.remove('active');
-                    b.style.color = '#64748b';
-                    b.style.borderBottom = 'none';
-                });
-
-                e.currentTarget.classList.add('active');
-                e.currentTarget.style.color = 'var(--primary-color)';
-                e.currentTarget.style.borderBottom = '3px solid var(--primary-color)';
-
-                document.querySelectorAll('.sub-tab-content').forEach(c => {
-                    c.classList.remove('active');
-                    c.style.display = 'none';
-                });
-
-                const targetId = e.currentTarget.getAttribute('data-subtab');
-                const targetEl = document.getElementById(targetId);
-                if (targetEl) {
-                    targetEl.classList.add('active');
-                    targetEl.style.display = 'block';
-                }
-
-                if (targetId === 'sub-turmas-existentes') loadTurmasExistentes();
-                if (targetId === 'sub-alunos-turma') loadAlunosPorTurma();
-                if (targetId === 'sub-relatorios-auditoria') loadRelatorios();
-            });
+        window.addEventListener('veras:subtabchange', (e) => {
+            const targetId = e?.detail?.subTabId;
+            if (targetId === 'sub-turmas-existentes') loadTurmasExistentes();
+            if (targetId === 'sub-alunos-turma') loadAlunosPorTurma();
+            if (targetId === 'sub-relatorios-auditoria') loadRelatorios();
         });
 
         async function loadTurmasExistentes() {
@@ -2180,7 +2306,11 @@
 
                 await carregarTabelaAuditoria(turmasMap, professoresMap, alunosMap, "");
                 select.onchange = (e) => carregarTabelaAuditoria(turmasMap, professoresMap, alunosMap, e.target.value);
-            } catch (error) { console.error("Erro loadRelatorios:", error); }
+            } catch (error) {
+                console.error("Erro loadRelatorios:", error?.code, error?.message, error);
+                const tbody = document.querySelector('#diariosAuditTable tbody');
+                if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444;">Erro ao carregar relatórios.</td></tr>';
+            }
         }
 
         async function carregarTabelaAuditoria(turmasMap, professoresMap, alunosMap, turmaIdFilter) {

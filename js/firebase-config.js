@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
@@ -12,11 +12,23 @@ const firebaseConfig = {
   measurementId: "G-BW02R5X7L3"
 };
 
-// Aplicação primária (para login do usuário atual - Professor)
-export const app = initializeApp(firebaseConfig);
+// Aplicação primária (para login e escrita autenticada no db principal)
+export const app = getApps().some(a => a.name === "[DEFAULT]")
+  ? getApp()
+  : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // Aplicação secundária (usada pelo Admin para cadastrar novos usuários sem ser deslogado)
-export const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
-export const secondaryAuth = getAuth(secondaryApp);
+export function getSecondaryApp() {
+  return getApps().some(a => a.name === "SecondaryApp")
+    ? getApp("SecondaryApp")
+    : initializeApp(firebaseConfig, "SecondaryApp");
+}
+
+export function getOrInitSecondaryAuth() {
+  return getAuth(getSecondaryApp());
+}
+
+export const secondaryApp = getSecondaryApp();
+export const secondaryAuth = getOrInitSecondaryAuth();

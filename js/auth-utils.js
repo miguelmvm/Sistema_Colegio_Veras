@@ -1,5 +1,5 @@
 // Utilitários de perfil/permissões partilhados por portais.html e pelos painéis.
-import { db } from './firebase-config.js';
+import { db } from './firebase-config.js?v=20261125';
 import { collection, query, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
 /**

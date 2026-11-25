@@ -4,9 +4,9 @@
 //   { turmaId, turmaNome, data: "AAAA-MM-DD", disciplina, professorId, professorName,
 //     conteudo, sumario, observacoes, presencas: { [alunoUid]: "P" | "F" }, chamadas: { [alunoUid]: "Presente" | "Falta" },
 //     alunos: { [alunoUid]: nome }, totalAlunos, totalPresentes, createdAt, updatedAt }
-import { db } from './firebase-config.js';
+import { db } from './firebase-config.js?v=20261125';
 import { collection, query, where, getDocs, doc, getDoc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
-import { esc, parseDisciplinas } from './auth-utils.js';
+import { esc, parseDisciplinas } from './auth-utils.js?v=20261125';
 
 const slug = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const hoje = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };

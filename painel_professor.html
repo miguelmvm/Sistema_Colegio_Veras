@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal do Docente | Colégio Veras</title>
-    <link rel="stylesheet" href="css/styles.css?v=20261124">
+    <link rel="stylesheet" href="css/styles.css?v=20261125">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -422,11 +422,101 @@
         <span id="toastMsg">Operação concluída com sucesso!</span>
     </div>
 
+    <!-- Boot síncrono de UI (independente do SDK do Firebase / rede) -->
+    <script>
+        (function () {
+            window.__verasModuleReady = false;
+            window.addEventListener('error', (ev) => {
+                console.error('[Erro Global - Professor]', ev.message, ev.filename, ev.lineno, ev.error);
+            });
+            window.addEventListener('unhandledrejection', (ev) => {
+                console.error('[Promise Não Tratada - Professor]', ev.reason);
+            });
+
+            const sidebarEl = document.getElementById('sidebar');
+            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+            function setSidebarOpen(open) {
+                if (!sidebarEl || !sidebarBackdrop) return;
+                sidebarEl.classList.toggle('open', open);
+                sidebarBackdrop.classList.toggle('active', open);
+            }
+            window.__setSidebarOpen = setSidebarOpen;
+
+            document.getElementById('mobileMenuBtn')?.addEventListener('click', () => setSidebarOpen(true));
+            document.getElementById('sidebarCloseBtn')?.addEventListener('click', () => setSidebarOpen(false));
+            sidebarBackdrop?.addEventListener('click', () => setSidebarOpen(false));
+
+            document.querySelectorAll('.tab-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = e.currentTarget.getAttribute('data-tab');
+                    if (!targetId) return;
+                    const targetEl = document.getElementById(targetId);
+                    if (!targetEl) return;
+
+                    document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    targetEl.classList.add('active');
+                    setSidebarOpen(false);
+                });
+            });
+
+            function closeAllProfModals() {
+                ['modalAtividades', 'modalEditarAtividade', 'modalDetalheAvisoProf'].forEach(id => {
+                    const m = document.getElementById(id);
+                    if (m) m.classList.remove('active');
+                });
+            }
+            window.__closeAllProfModals = closeAllProfModals;
+
+            function bindModalDismiss(modalId, closeBtnIds) {
+                const modal = document.getElementById(modalId);
+                if (!modal) return;
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.classList.remove('active');
+                });
+                closeBtnIds.forEach(btnId => {
+                    const btn = document.getElementById(btnId);
+                    if (btn) btn.addEventListener('click', () => modal.classList.remove('active'));
+                });
+            }
+
+            bindModalDismiss('modalAtividades', ['closeModalAtividades', 'cancelarModalAtividades']);
+            bindModalDismiss('modalEditarAtividade', ['closeModalEditarAtividade', 'cancelarEdicaoAtividade']);
+            bindModalDismiss('modalDetalheAvisoProf', ['closeModalAvisoProf', 'fecharModalAvisoProfBtn']);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeAllProfModals();
+                    setSidebarOpen(false);
+                }
+            });
+
+            const diarioDataInput = document.getElementById('diarioData');
+            if (diarioDataInput && !diarioDataInput.value) {
+                const d = new Date();
+                d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                diarioDataInput.value = d.toISOString().slice(0, 10);
+            }
+
+            document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!window.__verasModuleReady) {
+                    window.location.href = 'portais.html';
+                }
+            });
+        })();
+    </script>
+
     <script type="module">
-        import { auth, db } from './js/firebase-config.js';
-        import { esc, parseDisciplinas, normalizeBimestre } from './js/auth-utils.js';
+        import { auth, db } from './js/firebase-config.js?v=20261125';
+        import { esc, parseDisciplinas, normalizeBimestre } from './js/auth-utils.js?v=20261125';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
         import { collection, query, where, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        window.__verasModuleReady = true;
 
         let currentProfUid = "";
         let currentAuthUid = "";
@@ -440,6 +530,35 @@
         let avisosProfCache = [];
         let modalAtividadeAtualId = null;
         let atividadeEditandoId = null;
+        let profBootResolved = false;
+
+        function setProfBootFallback(msg) {
+            const profNameEl = document.getElementById('profName');
+            if (profNameEl && profNameEl.innerText.includes('A carregar')) profNameEl.innerText = 'Docente';
+
+            ['diarioTurmaSelect', 'diarioDisciplina', 'notasTurmaSelect', 'notasDisciplina', 'ativTurmaSelect', 'ativDisciplinaSelect', 'profAvisoTurmaSelect'].forEach(id => {
+                const sel = document.getElementById(id);
+                if (sel && sel.options.length === 1 && sel.options[0].textContent.includes('A carregar')) {
+                    sel.innerHTML = `<option value="">${esc(msg || 'Indisponível no momento')}</option>`;
+                }
+            });
+
+            const listaAtiv = document.getElementById('listaAtividadesProf');
+            if (listaAtiv && listaAtiv.textContent.includes('A carregar')) {
+                listaAtiv.innerHTML = `<tr><td colspan="5" style="padding:1.5rem; text-align:center; color:#ef4444;">${esc(msg || 'Erro ao carregar atividades.')}</td></tr>`;
+            }
+            const listaAvisos = document.getElementById('listaAvisosProf');
+            if (listaAvisos && listaAvisos.textContent.includes('A carregar')) {
+                listaAvisos.innerHTML = `<tr><td colspan="5" style="padding:1.5rem; text-align:center; color:#ef4444;">${esc(msg || 'Erro ao carregar avisos.')}</td></tr>`;
+            }
+        }
+
+        setTimeout(() => {
+            if (!profBootResolved) {
+                console.error("[Painel Professor] Tempo limite ao aguardar autenticação do Firebase.");
+                setProfBootFallback("Tempo limite excedido ao carregar dados. Recarregue a página.");
+            }
+        }, 15000);
 
         function showToast(msg) {
             const toast = document.getElementById('toastNotification');
@@ -474,89 +593,20 @@
             }
         }
 
-        // --- MOBILE SIDEBAR ---
-        const sidebarEl = document.getElementById('sidebar');
-        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
-
-        function setSidebarOpen(open) {
-            if (!sidebarEl || !sidebarBackdrop) return;
-            sidebarEl.classList.toggle('open', open);
-            sidebarBackdrop.classList.toggle('active', open);
-        }
-
-        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', () => setSidebarOpen(true));
-        if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', () => setSidebarOpen(false));
-        if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => setSidebarOpen(false));
-
-        // --- TAB NAVIGATION ---
-        document.querySelectorAll('.tab-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = e.currentTarget.getAttribute('data-tab');
-                if (!targetId) return;
-                const targetEl = document.getElementById(targetId);
-                if (!targetEl) return;
-
-                document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                targetEl.classList.add('active');
-                setSidebarOpen(false);
-            });
-        });
-
-        // --- MODAL CLOSING HELPERS ---
-        function closeAllProfModals() {
-            ['modalAtividades', 'modalEditarAtividade', 'modalDetalheAvisoProf'].forEach(id => {
-                const m = document.getElementById(id);
-                if (m) m.classList.remove('active');
-            });
-        }
-
-        function bindModalDismiss(modalId, closeBtnIds) {
-            const modal = document.getElementById(modalId);
-            if (!modal) return;
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) modal.classList.remove('active');
-            });
-            closeBtnIds.forEach(btnId => {
-                const btn = document.getElementById(btnId);
-                if (btn) btn.addEventListener('click', () => modal.classList.remove('active'));
-            });
-        }
-
-        bindModalDismiss('modalAtividades', ['closeModalAtividades', 'cancelarModalAtividades']);
-        bindModalDismiss('modalEditarAtividade', ['closeModalEditarAtividade', 'cancelarEdicaoAtividade']);
-        bindModalDismiss('modalDetalheAvisoProf', ['closeModalAvisoProf', 'fecharModalAvisoProfBtn']);
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeAllProfModals();
-                setSidebarOpen(false);
-            }
-        });
-
         // --- LOGOUT ---
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                signOut(auth).then(() => window.location.href = 'portais.html');
+                signOut(auth).catch(err => console.error("[Logout Professor]", err?.code, err?.message)).finally(() => {
+                    window.location.href = 'portais.html';
+                });
             });
-        }
-
-        // --- SET DEFAULT DATE ON DIÁRIO ---
-        const diarioDataInput = document.getElementById('diarioData');
-        if (diarioDataInput && !diarioDataInput.value) {
-            const d = new Date();
-            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-            diarioDataInput.value = d.toISOString().slice(0, 10);
         }
 
         // --- AUTH & RBAC ISOLAMENTO ---
         onAuthStateChanged(auth, async (user) => {
+            profBootResolved = true;
             if (!user) { window.location.href = 'portais.html'; return; }
             try {
                 let userData = null;
@@ -576,15 +626,23 @@
                 currentUserData = userData;
                 currentAuthUid = user.uid;
                 currentProfUid = userData.uid || user.uid;
-                currentProfName = userData.name || (user.email ? user.email.split('@')[0] : 'Docente');
+                const baseName = userData.name || userData.nome || '';
+                currentProfName = baseName || user.email || 'Docente';
 
                 const profNameEl = document.getElementById('profName');
-                if (profNameEl) profNameEl.innerText = "Prof. " + currentProfName.split(" ")[0];
+                if (profNameEl) {
+                    profNameEl.innerText = baseName ? ("Prof. " + baseName.split(" ")[0]) : (user.email || 'Docente');
+                }
 
                 await initDocenteData();
             } catch (error) {
-                console.error("Erro ao autenticar docente:", error);
+                console.error("[Painel Professor - auth/init]", error?.code, error?.message, error);
+                setProfBootFallback("Erro ao carregar dados do docente (" + (error?.code || 'erro') + ").");
             }
+        }, (authErr) => {
+            profBootResolved = true;
+            console.error("[Painel Professor - Auth Error]", authErr?.code, authErr?.message, authErr);
+            setProfBootFallback("Erro de autenticação (" + (authErr?.code || 'erro') + ").");
         });
 
         const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
@@ -758,7 +816,12 @@
 
                 await Promise.all([loadAtividadesCriadas(), loadAvisosProfessor()]);
             } catch (err) {
-                console.error("Erro em initDocenteData:", err);
+                console.error("[Painel Professor - initDocenteData]", err?.code, err?.message, err);
+                setProfBootFallback("Erro ao carregar turmas e horários (" + (err?.code || 'erro') + ").");
+            } finally {
+                if (!document.getElementById('profCalendarGrid')?.innerHTML) {
+                    renderCalendar();
+                }
             }
         }
 
